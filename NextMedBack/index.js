@@ -6,6 +6,7 @@ const app = express();
 // Import routes
 const authRoutes = require('./routes/authRoutes');
 const templateRoutes = require('./routes/templateRoutes'); // Import template routes
+const doctorRoutes = require('./routes/doctorRoutes'); // Import doctor routes
 
 // Middleware
 app.use(express.json());
@@ -13,6 +14,7 @@ app.use(express.json());
 // Use routes
 app.use('/auth', authRoutes);
 app.use('/templates', templateRoutes); // Use '/templates' as the base path for template routes
+app.use('/api/doctor', doctorRoutes); // Use '/api/doctor' as the base path for doctor routes
 
 // MongoDB connection
 const mongoURI = process.env.MONGODB_URI;

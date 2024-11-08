@@ -1,6 +1,6 @@
 require('dotenv').config();
-const bcrypt = require('bcrypt');  // Import bcrypt
-const jwt = require('jsonwebtoken');  // Import jsonwebtoken
+const bcrypt = require('bcrypt'); // Import bcrypt
+const jwt = require('jsonwebtoken'); // Import jsonwebtoken
 const Doctor = require('../model/Doctor'); // Importing the Doctor model
 
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -26,7 +26,15 @@ exports.login = async (req, res) => {
       expiresIn: '1h',
     });
 
-    res.status(200).json({ token });
+    // Return doctor info and token
+    res.status(200).json({
+      id: doctor._id,
+      name: doctor.name,
+      email: doctor.email,
+      hospital: doctor.hospital,
+      role: doctor.role,
+      token: token,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server error' });

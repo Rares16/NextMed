@@ -1,75 +1,73 @@
-// app/auth/ProfileScreen.jsx
-import React from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity, FlatList, Dimensions } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, Image, StyleSheet, TouchableOpacity, FlatList, Dimensions, ActivityIndicator } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-
+import { getDoctorInfo } from '../(services)/api/api';
+import { Stack, useRouter, useLocalSearchParams, useGlobalSearchParams } from 'expo-router'
 const { height } = Dimensions.get('window');
 
-const ProfileScreen = ({ navigation }) => {
-  const patients = [
-    { id: '1', name: 'Alice Johnson', age: 45 },
-    { id: '2', name: 'Bob Smith', age: 34 },
-    { id: '3', name: 'Cathy Brown', age: 29 },
-    { id: '4', name: 'David Lee', age: 52 },
-    { id: '5', name: 'Emma Davis', age: 41 },
-    // Add more patients to demonstrate scrolling
-  ];
+const ProfileScreen = () => {
+  const { doctorId } = useLocalSearchParams(); // Extract doctorId from query parameters
+  const [doctor, setDoctor] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const handlePatientPress = (patientId) => {
-    console.log(`Navigate to PatientProfileScreen for patient ID: ${patientId}`);
-  };
+  useEffect(() => {
+    if (doctorId) {
+      const fetchDoctorInfo = async () => {
+        try {
+          const doctorData = await getDoctorInfo(doctorId);
+          setDoctor(doctorData);
+        } catch (error) {
+          console.error('Error fetching doctor data', error);
+        } finally {
+          setLoading(false);
+        }
+      };
 
-  const handleAddPatient = () => {
-    console.log("Add Patient button pressed");
-  };
+      fetchDoctorInfo();
+    } else {
+      console.error('No doctor ID provided');
+      setLoading(false);
+    }
+  }, [doctorId]);
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#00796b" />
+      </View>
+    );
+  }
+
+  if (!doctor) {
+    return (
+      <View style={styles.errorContainer}>
+        <Text>Unable to load doctor information. Please try again later.</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
-      {/* Profile Picture and Doctor's Name */}
       <View style={styles.profileImageContainer}>
         <Image
-          source={{ uri: 'https://via.placeholder.com/150' }}
+          source={{ uri: doctor.profileImage || 'https://ih1.redbubble.net/image.2382029195.6138/flat,750x,075,f-pad,750x1000,f8f8f8.webp' }}
           style={styles.profileImage}
         />
       </View>
-      <Text style={styles.profileName}>Dr. John Doe</Text>
+      <Text style={styles.profileName}>Dr. {doctor.name}</Text>
 
-      {/* Add Patient Button */}
-      <TouchableOpacity style={styles.addPatientButton} onPress={handleAddPatient}>
-        <Text style={styles.addPatientButtonText}>Add Patient</Text>
-      </TouchableOpacity>
-
-      {/* Gradient overlay for top fade effect */}
-      <LinearGradient
-        colors={['rgba(255, 255, 255, 1)', 'rgba(255, 255, 255, 0)']}
-        style={styles.topFade}
-        pointerEvents="none"
-      />
-
-      {/* Patient List */}
+      {/* Display the list of patients */}
       <FlatList
-        data={patients}
-        keyExtractor={(item) => item.id}
+        data={doctor.patients || []}
+        keyExtractor={(item, index) => item._id || index.toString()}
         renderItem={({ item }) => (
-          <TouchableOpacity style={styles.patientItem} onPress={() => handlePatientPress(item.id)}>
+          <TouchableOpacity style={styles.patientItem} onPress={() => console.log('Navigate to Patient:', item._id)}>
             <Text style={styles.patientName}>{item.name}</Text>
             <Text style={styles.patientAge}>Age: {item.age}</Text>
           </TouchableOpacity>
         )}
         contentContainerStyle={styles.patientList}
       />
-
-      {/* Gradient overlay for bottom fade effect */}
-      <LinearGradient
-        colors={['rgba(255, 255, 255, 0)', 'rgba(255, 255, 255, 1)']}
-        style={styles.bottomFade}
-        pointerEvents="none"
-      />
-
-      {/* Logout Button */}
-      <TouchableOpacity style={styles.logoutButton} onPress={() => console.log('Logout pressed')}>
-        <Text style={styles.logoutButtonText}>Logout</Text>
-      </TouchableOpacity>
     </View>
   );
 };
@@ -104,18 +102,6 @@ const styles = StyleSheet.create({
     marginTop: 10,
     marginBottom: 20,
   },
-  addPatientButton: {
-    backgroundColor: '#00796b',
-    paddingVertical: 12,
-    paddingHorizontal: 40,
-    borderRadius: 8,
-    marginBottom: 10,
-  },
-  addPatientButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 18,
-  },
   patientList: {
     width: '100%',
     paddingHorizontal: 20,
@@ -123,7 +109,7 @@ const styles = StyleSheet.create({
   },
   patientItem: {
     backgroundColor: '#e6f2ef',
-    paddingVertical: 10,
+    paddingVertical: 15,
     paddingHorizontal: 80,
     borderRadius: 8,
     marginBottom: 10,
@@ -134,38 +120,23 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   patientName: {
-    fontSize: 16,
+    fontSize: 20,
     fontWeight: 'bold',
     color: '#00796b',
   },
   patientAge: {
-    fontSize: 14,
+    fontSize: 16,
     color: '#00796b',
     marginTop: 2,
   },
-  logoutButton: {
-    position: 'absolute',
-    bottom: 40,
-    backgroundColor: '#00796b',
-    paddingVertical: 10,
-    paddingHorizontal: 24,
-    borderRadius: 8,
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  logoutButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
-  topFade: {
-    position: 'absolute',
-    top: 200,
-    width: '100%',
-    height: 40,
-  },
-  bottomFade: {
-    position: 'absolute',
-    bottom: 90,
-    width: '100%',
-    height: 40,
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

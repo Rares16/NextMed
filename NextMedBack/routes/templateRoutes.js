@@ -4,8 +4,10 @@ const router = express.Router();
 const {
   createDefaultTemplate,
   customizeTemplate,
+  getTemplateById, 
   getTemplatesBySpecialty,
   getCustomizedTemplates,
+  updateTemplateById,
   processAllStepsForDoctor,
 } = require('../controller/templateController');
 
@@ -23,5 +25,6 @@ router.get('/my/:doctorId', getCustomizedTemplates);
 
 // Route to handle all steps in one sequence for a given doctor
 router.post('/all-steps/:doctorId', processAllStepsForDoctor);
-
+router.get('/:templateId', getTemplateById); 
+router.patch('/:templateId', updateTemplateById);
 module.exports = router;
