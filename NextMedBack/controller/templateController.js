@@ -88,24 +88,33 @@ exports.getTemplatesBySpecialty = async (req, res) => {
 
 // Get customized templates for a specific doctor
 exports.getCustomizedTemplates = async (req, res) => {
-  const { doctorId } = req.params;
-
-  // Validation
-  if (!doctorId || !mongoose.Types.ObjectId.isValid(doctorId)) {
-    return res.status(400).json({ message: 'Invalid doctor ID.' });
-  }
-
-  try {
-    const customTemplates = await Template.find({ doctorId });
-    if (!customTemplates.length) {
-      return res.status(404).json({ message: 'No customized templates found for this doctor.' });
+    const { doctorId } = req.params;
+  
+    // Validation
+    if (!doctorId || !mongoose.Types.ObjectId.isValid(doctorId)) {
+      console.error(`Invalid or missing doctorId: ${doctorId}`);
+      return res.status(400).json({ message: 'Invalid doctor ID.' });
     }
-    res.status(200).json(customTemplates);
-  } catch (error) {
-    console.error('Error retrieving customized templates:', error.message);
-    res.status(500).json({ message: 'Server error while retrieving customized templates.' });
-  }
-};
+  
+    try {
+      console.log(`Fetching templates for doctor ID: ${doctorId}`);
+      const customTemplates = await Template.find({ doctorId: new mongoose.Types.ObjectId(doctorId) });
+  
+      // Return an empty array with a 200 status if no templates found
+      if (!customTemplates.length) {
+        console.log('No customized templates found for this doctor.');
+        return res.status(200).json([]);
+      }
+  
+      // Send back the customized templates found for the doctor
+      res.status(200).json(customTemplates);
+    } catch (error) {
+      console.error('Error retrieving customized templates:', error.message);
+      res.status(500).json({ message: 'Server error while retrieving customized templates.' });
+    }
+  };
+  
+
 
 // Process all steps for a given doctor (for demonstration purposes)
 exports.processAllStepsForDoctor = async (req, res) => {
@@ -166,3 +175,73 @@ exports.processAllStepsForDoctor = async (req, res) => {
     res.status(500).json({ message: 'Server error while processing all steps for doctor.' });
   }
 };
+exports.getTemplateById = async (req, res) => {
+    try {
+      const { templateId } = req.params;
+  
+      // Validate the template ID
+      if (!templateId || !mongoose.Types.ObjectId.isValid(templateId)) {
+        return res.status(400).json({ message: 'Invalid template ID.' });
+      }
+  
+      // Find the template by ID
+      const template = await Template.findById(templateId);
+  
+      if (!template) {
+        return res.status(404).json({ message: 'Template not found.' });
+      }
+  
+      // Respond with the found template
+      res.status(200).json(template);
+    } catch (error) {
+      console.error('Error retrieving template:', error);
+      res.status(500).json({ message: 'Server error while retrieving template.' });
+    }
+  };
+  exports.updateTemplateById = async (req, res) => {
+    const { templateId } = req.params;
+    const { fields } = req.body; // Make sure to use fields, not updates
+  
+    console.log(`Received update request for template ID: ${templateId}`);
+    console.log('Fields received for update:', fields);
+  
+    // Validation
+    if (!templateId || !mongoose.Types.ObjectId.isValid(templateId)) {
+      console.error('Invalid template ID');
+      return res.status(400).json({ message: 'Invalid template ID.' });
+    }
+  
+    if (!fields || !Array.isArray(fields)) {
+      console.error('Invalid fields provided:', fields);
+      return res.status(400).json({ message: 'Invalid updates provided. "fields" must be an array.' });
+    }  
+    try {
+      // Find the template by ID
+      let template = await Template.findById(templateId);
+      if (!template) {
+        return res.status(404).json({ message: 'Template not found.' });
+      }
+  
+      // Update fields - Add or remove fields
+      fields.forEach(update => {
+        if (update.action === 'add') {
+          template.fields.push({
+            fieldName: update.fieldName,
+            fieldType: update.fieldType,
+            required: update.required,
+            options: update.options || [],
+          });
+        } else if (update.action === 'remove') {
+          template.fields = template.fields.filter(field => field.fieldName !== update.fieldName);
+        }
+      });
+  
+      // Save updated template
+      await template.save();
+      res.status(200).json(template);
+    } catch (error) {
+      console.error('Error updating template:', error.message);
+      res.status(500).json({ message: 'Server error while updating template.' });
+    }
+  };
+  

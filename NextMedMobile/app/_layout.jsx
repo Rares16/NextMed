@@ -1,10 +1,16 @@
-// app/_layout.jsx
-import { Stack } from 'expo-router';
+import { Stack } from "expo-router";
+import queryClient from "./(services)/querryClient";
+import { QueryClientProvider } from "@tanstack/react-query";
+import store from "./(redux)/store";
+import { Provider } from "react-redux";
+import AppWrapper from "./(redux)/AppWrapper";
 
-export default function Layout() {
+export default function RootLayout() {
   return (
-    <Stack screenOptions={{ headerShown: false }}>
-      {/* The Login screen will render here */}
-    </Stack>
+    <Provider store={store}>
+      <QueryClientProvider client={queryClient}>
+        <AppWrapper />
+      </QueryClientProvider>
+    </Provider>
   );
 }
