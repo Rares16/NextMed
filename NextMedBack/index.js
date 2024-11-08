@@ -1,31 +1,33 @@
-require('dotenv').config(); // Import dotenv to read .env file
-const { MongoClient, ServerApiVersion } = require('mongodb');
+require('dotenv').config(); // Import dotenv to read environment variables
+const express = require('express');
+const mongoose = require('mongoose');
+const app = express();
 
-// Load the MongoDB URI from .env file
-const uri = process.env.MONGODB_URI;
+// Import routes
+const authRoutes = require('./routes/authRoutes');
 
-// Create a MongoClient with a MongoClientOptions object to set the Stable API version
-const client = new MongoClient(uri, {
-  serverApi: {
-    version: ServerApiVersion.v1,
-    strict: true,
-    deprecationErrors: true,
-  }
+// Middleware
+app.use(express.json());
+
+// Use routes
+app.use('/auth', authRoutes);
+
+
+// MongoDB connection
+const mongoURI = process.env.MONGODB_URI;
+
+mongoose.connect(mongoURI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+})
+.then(() => {
+    console.log('Connected to MongoDB successfully.');
+    // Start the server only after a successful connection
+    const PORT = process.env.PORT || 3000;
+    app.listen(PORT, () => {
+        console.log(`Server is running on port ${PORT}`);
+    });
+})
+.catch((error) => {
+    console.error('Error connecting to MongoDB:', error);
 });
-
-async function run() {
-  try {
-    // Connect the client to the server (optional starting in v4.7)
-    await client.connect();
-    // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
-    console.log("Pinged your deployment. You successfully connected to MongoDB!");
-  } catch (error) {
-    console.error("Error connecting to MongoDB:", error);
-  } finally {
-    // Ensures that the client will close when you finish/error
-    await client.close();
-  }
-}
-
-run().catch(console.dir);
