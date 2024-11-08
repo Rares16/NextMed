@@ -3,7 +3,7 @@ import { StatusBar } from 'expo-status-bar';
 import { View, StyleSheet } from 'react-native';
 
 // Default export
-export default function app() {
+export default function App() {
   return (
     <View style={styles.container}>
       <ExpoRouter />
