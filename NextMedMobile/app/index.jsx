@@ -8,7 +8,7 @@ const LoginScreen = () => {
 
   const handleLogin = () => {
     // Navigate to the authenticated section after login
-    router.push('/auth/ProfileScreen');
+    router.push('/(auth)/dashboard');
   };
 
   return (
