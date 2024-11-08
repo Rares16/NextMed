@@ -1,17 +1,18 @@
-require('dotenv').config(); // Import dotenv to read environment variables
+require('dotenv').config(); // Load environment variables
 const express = require('express');
 const mongoose = require('mongoose');
 const app = express();
 
 // Import routes
 const authRoutes = require('./routes/authRoutes');
+const templateRoutes = require('./routes/templateRoutes'); // Import template routes
 
 // Middleware
 app.use(express.json());
 
 // Use routes
 app.use('/auth', authRoutes);
-
+app.use('/templates', templateRoutes); // Use '/templates' as the base path for template routes
 
 // MongoDB connection
 const mongoURI = process.env.MONGODB_URI;
