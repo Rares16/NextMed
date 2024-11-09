@@ -3,17 +3,17 @@ import {
   View,
   Text,
   TextInput,
-  Button,
-  StyleSheet,
   ActivityIndicator,
   ScrollView,
   TouchableOpacity,
+  StyleSheet,
 } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, useNavigation } from 'expo-router'; // Add useNavigation if using Expo Router
 import { getTemplateById, updateTemplateById } from '../(services)/api/api';
 
 export default function TemplateDetailScreen() {
-  const { templateId } = useLocalSearchParams(); 
+  const { templateId } = useLocalSearchParams();
+  const navigation = useNavigation(); // Access navigation for back button
   const [template, setTemplate] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -95,6 +95,11 @@ export default function TemplateDetailScreen() {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
+      {/* Back Button */}
+      <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+        <Text style={styles.backButtonText}>Back</Text>
+      </TouchableOpacity>
+
       <Text style={styles.header}>Template Details</Text>
       <View style={styles.templateInfoContainer}>
         <Text style={styles.templateInfo}>Name: <Text style={styles.boldText}>{template.name}</Text></Text>
@@ -175,6 +180,17 @@ const styles = StyleSheet.create({
     color: "#093a59",
     marginBottom: 20,
   },
+  backButton: {
+    alignSelf: 'flex-start',
+    marginBottom: 20,
+    backgroundColor: '#14967f',
+    padding: 10,
+    borderRadius: 5,
+  },
+  backButtonText: {
+    color: '#fff',
+    fontWeight: '600',
+  },
   templateInfoContainer: {
     backgroundColor: "#ffffff",
     padding: 15,
@@ -254,33 +270,36 @@ const styles = StyleSheet.create({
   },
   input: {
     height: 45,
-    borderColor: "#b2bec3",
+    borderColor: "#ddd",
     borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    backgroundColor: "#fff",
-    marginBottom: 15,
-    color: "#093a59",
+    borderRadius: 5,
+    padding: 10,
+    fontSize: 16,
+    color: "#444",
+    backgroundColor: "#f9f9f9",
+    marginTop: 10,
   },
   addButton: {
-    paddingVertical: 15,
-    borderRadius: 5,
     backgroundColor: "#14967f",
+    padding: 12,
+    borderRadius: 5,
     alignItems: "center",
-    marginTop: 10,
+    marginTop: 20,
   },
   addButtonText: {
     color: "#fff",
     fontWeight: "600",
-    fontSize: 16,
+    fontSize: 18,
   },
   errorContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    padding: 20,
   },
   errorText: {
-    color: "red",
     fontSize: 18,
+    color: "red",
+    textAlign: "center",
   },
 });

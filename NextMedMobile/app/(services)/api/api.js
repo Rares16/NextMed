@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const DB_URL = "https://good-wasps-fetch.loca.lt/"; // Use the IP address of the computer running the server
+const DB_URL = "https://large-parks-smell.loca.lt/"; // Use the IP address of the computer running the server
 
 // Login User
 export const loginUser = async (user) => {
@@ -31,6 +31,24 @@ export const getDoctorInfo = async (doctorId) => {
   } catch (error) {
     console.error('Error fetching doctor info:', error);
     throw error; // Re-throw the error so it can be handled where this function is called
+  }
+};
+export const getPatientInfo = async (patientID) => {
+  try {
+    console.log('Fetching data for patient ID:', patientID); // Log patientID
+    const response = await axios.get(
+      `${DB_URL}api/patient/${patientID}`,
+      {
+        headers: {
+          "Content-Type": "application/json",
+        }
+      }
+    );
+    console.log('Response:', response.data); // Log response to see the data
+    return response.data;
+  } catch (error) {
+    console.error(`Error fetching patient information for ID: ${patientID}`, error);
+    throw error;
   }
 };
 

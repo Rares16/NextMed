@@ -1,16 +1,20 @@
 import React, { useEffect } from 'react';
-import { View, Text, TouchableOpacity, FlatList, ActivityIndicator, Dimensions } from 'react-native';
+import {
+  Text,
+  TouchableOpacity,
+  FlatList,
+  ActivityIndicator,
+  SafeAreaView
+} from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { getCustomizedTemplates, getTemplatesBySpecialty } from '../(services)/api/api';
 import { useSelector } from 'react-redux';
 import { useRouter } from 'expo-router';
-import { TemplateScreenStyles } from '../../styles/TemplateScreenStyles'; // Import refactored styles
-
-const { height, width } = Dimensions.get('window');
+import { TemplateScreenStyles } from '../../styles/TemplateScreenStyles';
 
 export default function TemplatesScreen() {
   const user = useSelector((state) => state.auth.user);
-  const specialty = 'Gynecology'; // Set specialty for testing
+  const specialty = 'Gynecology';
   const router = useRouter();
 
   useEffect(() => {
@@ -21,7 +25,6 @@ export default function TemplatesScreen() {
     }
   }, [user]);
 
-  // Fetch customized templates
   const {
     data: customizedTemplates,
     isLoading: loadingCustomized,
@@ -32,7 +35,6 @@ export default function TemplatesScreen() {
     enabled: !!user?.id,
   });
 
-  // Fetch default templates by specialty
   const {
     data: defaultTemplates,
     isLoading: loadingDefault,
@@ -43,71 +45,51 @@ export default function TemplatesScreen() {
     enabled: !!specialty,
   });
 
-  if (loadingCustomized || loadingDefault) {
-    return (
-      <View style={TemplateScreenStyles.loadingContainer}>
-        <ActivityIndicator size="large" color="#00796b" />
-      </View>
-    );
-  }
-
-  if (customizedError || defaultError) {
-    return (
-      <View style={TemplateScreenStyles.errorContainer}>
-        <Text style={TemplateScreenStyles.errorText}>Error loading templates. Please try again later.</Text>
-        {customizedError && <Text style={TemplateScreenStyles.errorMessage}>{customizedError.message}</Text>}
-        {defaultError && <Text style={TemplateScreenStyles.errorMessage}>{defaultError.message}</Text>}
-      </View>
-    );
-  }
-
   const handleTemplateClick = (templateId) => {
     if (templateId) {
       router.push(`/TemplateDetailScreen?templateId=${templateId}`);
-    } else {
-      console.error('Invalid template ID.');
     }
   };
 
+  if (loadingCustomized || loadingDefault) {
+    return (
+      <SafeAreaView style={TemplateScreenStyles.loadingContainer}>
+        <ActivityIndicator size="large" color="#00796b" />
+      </SafeAreaView>
+    );
+  }
+
   return (
-    <View style={TemplateScreenStyles.container}>
+    <SafeAreaView style={TemplateScreenStyles.container}>
       <Text style={TemplateScreenStyles.header}>Customized Templates</Text>
-      {customizedTemplates?.length ? (
-        <FlatList
-          data={customizedTemplates}
-          keyExtractor={(item) => item._id}
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              style={TemplateScreenStyles.templateItem}
-              onPress={() => handleTemplateClick(item._id)}
-            >
-              <Text style={TemplateScreenStyles.templateName}>{item.name}</Text>
-            </TouchableOpacity>
-          )}
-          contentContainerStyle={TemplateScreenStyles.templateList}
-        />
-      ) : (
-        <Text style={TemplateScreenStyles.noTemplatesText}>No customized templates available.</Text>
-      )}
+      <FlatList
+        data={customizedTemplates}
+        renderItem={({ item }) => (
+          <TouchableOpacity
+            style={TemplateScreenStyles.templateItem}
+            onPress={() => handleTemplateClick(item._id)}
+          >
+            <Text style={TemplateScreenStyles.templateName}>{item.name}</Text>
+          </TouchableOpacity>
+        )}
+        keyExtractor={(item) => item._id}
+        contentContainerStyle={TemplateScreenStyles.templateList}
+      />
 
       <Text style={TemplateScreenStyles.header}>Default Templates</Text>
-      {defaultTemplates?.length ? (
-        <FlatList
-          data={defaultTemplates}
-          keyExtractor={(item) => item._id}
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              style={TemplateScreenStyles.templateItem}
-              onPress={() => handleTemplateClick(item._id)}
-            >
-              <Text style={TemplateScreenStyles.templateName}>{item.name}</Text>
-            </TouchableOpacity>
-          )}
-          contentContainerStyle={TemplateScreenStyles.templateList}
-        />
-      ) : (
-        <Text style={TemplateScreenStyles.noTemplatesText}>No default templates available for the selected specialty.</Text>
-      )}
-    </View>
+      <FlatList
+        data={defaultTemplates}
+        renderItem={({ item }) => (
+          <TouchableOpacity
+            style={TemplateScreenStyles.templateItem}
+            onPress={() => handleTemplateClick(item._id)}
+          >
+            <Text style={TemplateScreenStyles.templateName}>{item.name}</Text>
+          </TouchableOpacity>
+        )}
+        keyExtractor={(item) => item._id}
+        contentContainerStyle={TemplateScreenStyles.templateList}
+      />
+    </SafeAreaView>
   );
 }

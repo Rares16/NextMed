@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, Image, TouchableOpacity, FlatList, ActivityIndicator, Dimensions } from 'react-native';
 import { getDoctorInfo } from '../(services)/api/api';
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router'; // Import useRouter for navigation
 import { ProfileScreenStyles } from '../../styles/ProfileScreenStyles'; // Import refactored styles
 
 const { width, height } = Dimensions.get('window');
@@ -10,6 +10,7 @@ const ProfileScreen = () => {
   const { doctorId } = useLocalSearchParams(); // Extract doctorId from query parameters
   const [doctor, setDoctor] = useState(null);
   const [loading, setLoading] = useState(true);
+  const router = useRouter(); // Hook to handle navigation
 
   useEffect(() => {
     if (doctorId) {
@@ -48,6 +49,11 @@ const ProfileScreen = () => {
     );
   }
 
+  // Handle navigation to the patient profile
+  const handlePatientPress = (patientId) => {
+    router.push(`/PatientProfileScreen?patientId=${patientId}&doctorId=${doctorId}`);
+  };
+
   return (
     <View style={ProfileScreenStyles.container}>
       <View style={ProfileScreenStyles.profileImageContainer}>
@@ -66,7 +72,10 @@ const ProfileScreen = () => {
           data={doctor.patients}
           keyExtractor={(item) => item._id}
           renderItem={({ item }) => (
-            <TouchableOpacity style={ProfileScreenStyles.patientItem} onPress={() => console.log('Navigate to Patient:', item._id)}>
+            <TouchableOpacity
+              style={ProfileScreenStyles.patientItem}
+              onPress={() => handlePatientPress(item._id)} // Navigate to patient profile
+            >
               <Text style={ProfileScreenStyles.patientName}>{item.name}</Text>
               <Text style={ProfileScreenStyles.patientAge}>
                 Age: {item.fields && item.fields['Patient Age'] ? item.fields['Patient Age'] : 'N/A'}
