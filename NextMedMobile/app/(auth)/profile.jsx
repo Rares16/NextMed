@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity, FlatList, Dimensions, ActivityIndicator } from 'react-native';
+import { View, Text, Image, TouchableOpacity, FlatList, ActivityIndicator, Dimensions } from 'react-native';
 import { getDoctorInfo } from '../(services)/api/api';
 import { useLocalSearchParams } from 'expo-router';
+import { ProfileScreenStyles } from '../../styles/ProfileScreenStyles'; // Import refactored styles
 
-const { height } = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 
 const ProfileScreen = () => {
   const { doctorId } = useLocalSearchParams(); // Extract doctorId from query parameters
@@ -33,7 +34,7 @@ const ProfileScreen = () => {
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
+      <View style={ProfileScreenStyles.loadingContainer}>
         <ActivityIndicator size="large" color="#00796b" />
       </View>
     );
@@ -41,129 +42,44 @@ const ProfileScreen = () => {
 
   if (!doctor) {
     return (
-      <View style={styles.errorContainer}>
-        <Text>Unable to load doctor information. Please try again later.</Text>
+      <View style={ProfileScreenStyles.errorContainer}>
+        <Text style={ProfileScreenStyles.errorText}>Unable to load doctor information. Please try again later.</Text>
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <View style={styles.profileImageContainer}>
+    <View style={ProfileScreenStyles.container}>
+      <View style={ProfileScreenStyles.profileImageContainer}>
         <Image
           source={{ uri: doctor.profileImage || 'https://ih1.redbubble.net/image.2382029195.6138/flat,750x,075,f-pad,750x1000,f8f8f8.webp' }}
-          style={styles.profileImage}
+          style={ProfileScreenStyles.profileImage}
         />
       </View>
-      <Text style={styles.profileName}>Dr. {doctor.name}</Text>
-      <Text style={styles.profileHospital}>Hospital: {doctor.hospital}</Text>
+      <Text style={ProfileScreenStyles.profileName}>Dr. {doctor.name}</Text>
+      <Text style={ProfileScreenStyles.profileHospital}>Hospital: {doctor.hospital}</Text>
 
       {/* Display the list of patients */}
-      <Text style={styles.sectionTitle}>Patients</Text>
+      <Text style={ProfileScreenStyles.sectionTitle}>Patients</Text>
       {doctor.patients && doctor.patients.length > 0 ? (
         <FlatList
           data={doctor.patients}
           keyExtractor={(item) => item._id}
           renderItem={({ item }) => (
-            <TouchableOpacity style={styles.patientItem} onPress={() => console.log('Navigate to Patient:', item._id)}>
-              <Text style={styles.patientName}>{item.name}</Text>
-              <Text style={styles.patientAge}>
+            <TouchableOpacity style={ProfileScreenStyles.patientItem} onPress={() => console.log('Navigate to Patient:', item._id)}>
+              <Text style={ProfileScreenStyles.patientName}>{item.name}</Text>
+              <Text style={ProfileScreenStyles.patientAge}>
                 Age: {item.fields && item.fields['Patient Age'] ? item.fields['Patient Age'] : 'N/A'}
               </Text>
             </TouchableOpacity>
           )}
-          contentContainerStyle={styles.patientList}
+          contentContainerStyle={ProfileScreenStyles.patientList}
         />
       ) : (
-        // Corrected fallback for no patients assigned
-        <Text style={styles.noPatientsText}>No patients assigned yet.</Text>
+        <Text style={ProfileScreenStyles.noPatientsText}>No patients assigned yet.</Text>
       )}
     </View>
   );
 };
 
 export default ProfileScreen;
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    backgroundColor: '#f7f9f9',
-    paddingTop: 60,
-    paddingHorizontal: 20,
-  },
-  profileImageContainer: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    overflow: 'hidden',
-    marginBottom: 10,
-    borderWidth: 3,
-    borderColor: '#00796b',
-  },
-  profileImage: {
-    width: '100%',
-    height: '100%',
-  },
-  profileName: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#00796b',
-    marginTop: 10,
-    marginBottom: 10,
-  },
-  profileHospital: {
-    fontSize: 18,
-    color: '#00796b',
-    marginBottom: 20,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#00796b',
-    marginTop: 30,
-    marginBottom: 10,
-  },
-  patientList: {
-    width: '100%',
-    paddingHorizontal: 20,
-    paddingBottom: 80,
-  },
-  patientItem: {
-    backgroundColor: '#e6f2ef',
-    paddingVertical: 15,
-    paddingHorizontal: 20,
-    borderRadius: 8,
-    marginBottom: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    width: '100%',
-  },
-  patientName: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#00796b',
-  },
-  patientAge: {
-    fontSize: 16,
-    color: '#00796b',
-    marginTop: 2,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  errorContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  noPatientsText: {
-    marginTop: 20,
-    fontSize: 16,
-    color: '#00796b',
-  },
-});

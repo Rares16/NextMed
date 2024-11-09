@@ -19,13 +19,7 @@ export default function AuthLayout() {
           options={{
             tabBarLabel: 'Home',
             tabBarIcon: ({ color }) => <MaterialIcons name="home" size={24} color={color} />,
-          }}
-        />
-        <Tabs.Screen
-          name="profile" // Must match file name (ProfileScreen.jsx)
-          options={{
-            tabBarLabel: 'Profile',
-            tabBarIcon: ({ color }) => <MaterialIcons name="person" size={24} color={color} />,
+            headerShown : false
           }}
         />
         <Tabs.Screen
@@ -33,6 +27,23 @@ export default function AuthLayout() {
           options={{
             tabBarLabel: 'Templates',
             tabBarIcon: ({ color }) => <MaterialIcons name="description" size={24} color={color} />,
+            headerShown : false
+          }}
+        />
+        <Tabs.Screen
+          name="AudioRecordingScreen" // Ensure this matches file name (TemplatesScreen.jsx)
+          options={{
+            tabBarLabel: 'Record',
+            tabBarIcon: ({ color }) => <MaterialIcons name="mic" size={24} color={color} />,
+            headerShown : false
+          }}
+        />
+        <Tabs.Screen
+          name="profile" // Must match file name (ProfileScreen.jsx)
+          options={{
+            tabBarLabel: 'Profile',
+            tabBarIcon: ({ color }) => <MaterialIcons name="person" size={24} color={color} />,
+            headerShown : false
           }}
         />
       </Tabs>

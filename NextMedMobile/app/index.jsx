@@ -17,19 +17,13 @@ import { useDispatch, useSelector } from "react-redux";
 import { loginAction } from "./(redux)/authSlice";
 
 import logoStyle from "../styles/logo";
+import formStyle from '../styles/form';
+import buttonStyle from '../styles/button';
+import { colors } from '../styles/colors';
 
 // Calculate 80% of screen width for consistent width
 const screenWidth = Dimensions.get("window").width;
 const componentWidth = screenWidth * 0.8;
-
-// Color palette
-const colors = {
-  background: "#f1f9ff",
-  inputBackground: "#ccecee",
-  primaryText: "#095d7e",
-  buttonBackground: "#14967f",
-  buttonText: "#ffffff",
-};
 
 const LoginSchema = Yup.object().shape({
   email: Yup.string().email("Invalid email").required("Email is required"),
@@ -56,8 +50,26 @@ export default function Login() {
   }, [user, router.isReady]);
 
   return (
-    <View style={styles.container}>
+    <View style={{ 
+      flex: 1, 
+      justifyContent: 'center', 
+      alignItems: 'center', 
+      padding: 16, 
+      backgroundColor: 
+      colors.background 
+      }}>
       <Image source={require('../assets/logo.png')} style={logoStyle} />
+      <Text style={{
+        fontSize: 14,
+        color: colors.primaryText,
+        textAlign: "center",
+        marginBottom: 20,
+        paddingHorizontal: 20,
+        fontWeight: "300",
+      }}>
+        We take care of your paperwork so you can take care of your patients
+      </Text>
+
       <Formik
         initialValues={{ email: "", password: "" }}
         validationSchema={LoginSchema}
@@ -99,36 +111,32 @@ export default function Login() {
           errors,
           touched,
         }) => (
-          <View style={styles.form}>
+          <View style={formStyle.form}>
             <TextInput
-              style={styles.input}
+              style={formStyle.input}
               placeholder="Email"
               placeholderTextColor={colors.primaryText}
-              onChangeText={handleChange("email")}
-              onBlur={handleBlur("email")}
+              onChangeText={handleChange('email')}
+              onBlur={handleBlur('email')}
               value={values.email}
               keyboardType="email-address"
             />
-            {errors.email && touched.email ? (
-              <Text style={styles.errorText}>{errors.email}</Text>
-            ) : null}
+            {errors.email && touched.email ? <Text style={formStyle.errorText}>{errors.email}</Text> : null}
+
             <TextInput
-              style={styles.input}
+              style={formStyle.input}
               placeholder="Password"
               placeholderTextColor={colors.primaryText}
-              onChangeText={handleChange("password")}
-              onBlur={handleBlur("password")}
+              onChangeText={handleChange('password')}
+              onBlur={handleBlur('password')}
               value={values.password}
               secureTextEntry
             />
-            {errors.password && touched.password ? (
-              <Text style={styles.errorText}>{errors.password}</Text>
-            ) : null}
-            {errorMessage && (
-              <Text style={styles.errorText}>{errorMessage}</Text>
-            )}
-            <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-              <Text style={styles.buttonText}>Login</Text>
+            {errors.password && touched.password ? <Text style={formStyle.errorText}>{errors.password}</Text> : null}
+            {errorMessage && <Text style={formStyle.errorText}>{errorMessage}</Text>}
+
+            <TouchableOpacity style={buttonStyle.button} onPress={handleSubmit}>
+              <Text style={buttonStyle.buttonText}>Login</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -136,49 +144,3 @@ export default function Login() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 16,
-    backgroundColor: colors.background,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: "bold",
-    color: colors.primaryText,
-    marginBottom: 20,
-  },
-  form: {
-    width: componentWidth,
-  },
-  input: {
-    height: 50,
-    borderColor: colors.primaryText,
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 16,
-    marginBottom: 16,
-    backgroundColor: colors.inputBackground,
-    color: colors.primaryText,
-  },
-  errorText: {
-    color: "red",
-    marginBottom: 16,
-  },
-  button: {
-    height: 50,
-    backgroundColor: colors.buttonBackground,
-    justifyContent: "center",
-    alignItems: "center",
-    borderRadius: 8,
-    marginTop: 16,
-  },
-  buttonText: {
-    color: colors.buttonText,
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-});

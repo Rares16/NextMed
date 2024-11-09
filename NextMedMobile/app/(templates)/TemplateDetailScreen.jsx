@@ -13,7 +13,7 @@ import { useLocalSearchParams } from 'expo-router';
 import { getTemplateById, updateTemplateById } from '../(services)/api/api';
 
 export default function TemplateDetailScreen() {
-  const { templateId } = useLocalSearchParams(); // Extract templateId from route parameters
+  const { templateId } = useLocalSearchParams(); 
   const [template, setTemplate] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -26,25 +26,19 @@ export default function TemplateDetailScreen() {
         if (!templateId) {
           throw new Error('Template ID is missing.');
         }
-
-        console.log(`Fetching template details with ID: ${templateId}`);
         const fetchedTemplate = await getTemplateById(templateId);
-        console.log('Fetched template details:', fetchedTemplate);
         setTemplate(fetchedTemplate);
       } catch (err) {
-        console.error('Error fetching template details:', err.message);
         setError(err.message);
       } finally {
         setLoading(false);
       }
     };
-
     fetchTemplate();
   }, [templateId]);
 
   const handleAddField = async () => {
     try {
-      // Prepare updates for adding a new field
       const updates = {
         fields: [
           {
@@ -56,46 +50,29 @@ export default function TemplateDetailScreen() {
           },
         ],
       };
-  
-      // Log the data to see if it's correctly formatted
-      console.log('Sending update request with:', JSON.stringify({ ...updates, templateId }, null, 2));
-  
-      // Send the update request
       const updatedTemplate = await updateTemplateById(templateId, updates);
       setTemplate(updatedTemplate);
-      setNewField({ fieldName: '', fieldType: '', required: false, options: '' }); // Reset the form
+      setNewField({ fieldName: '', fieldType: '', required: false, options: '' });
     } catch (err) {
-      console.error('Error updating template:', err.response?.data || err.message);
       setError(err.response?.data?.message || err.message);
     }
   };
-  
-  
 
   const handleDeleteField = async (fieldName) => {
     try {
-      if (!templateId) {
-        throw new Error('Template ID is missing when trying to delete a field.');
-      }
+      if (!templateId) throw new Error('Template ID is missing when trying to delete a field.');
 
-      // Prepare the update payload for field removal
       const updates = {
         fields: [
           {
             action: 'remove',
-            fieldName: fieldName,
+            fieldName,
           },
         ],
       };
-
-      console.log('Sending update request with:', JSON.stringify({ ...updates, templateId }, null, 2));
-
-      // Send the update request
       const updatedTemplate = await updateTemplateById(templateId, updates);
-      console.log('Updated template after deletion:', updatedTemplate);
       setTemplate(updatedTemplate);
     } catch (err) {
-      console.error('Error deleting field:', err.message);
       setError(err.message);
     }
   };
@@ -103,7 +80,7 @@ export default function TemplateDetailScreen() {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#00796b" />
+        <ActivityIndicator size="large" color="#14967f" />
       </View>
     );
   }
@@ -111,7 +88,7 @@ export default function TemplateDetailScreen() {
   if (error) {
     return (
       <View style={styles.errorContainer}>
-        <Text style={styles.errorMessage}>{error}</Text>
+        <Text style={styles.errorText}>{error}</Text>
       </View>
     );
   }
@@ -119,18 +96,20 @@ export default function TemplateDetailScreen() {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.header}>Template Details</Text>
-      <Text style={styles.templateName}>Name: {template.name}</Text>
-      <Text style={styles.specialty}>Specialty: {template.specialty}</Text>
+      <View style={styles.templateInfoContainer}>
+        <Text style={styles.templateInfo}>Name: <Text style={styles.boldText}>{template.name}</Text></Text>
+        <Text style={styles.templateInfo}>Specialty: <Text style={styles.boldText}>{template.specialty}</Text></Text>
+      </View>
 
-      <Text style={styles.fieldsHeader}>Fields:</Text>
+      <Text style={styles.sectionTitle}>Fields:</Text>
       {template.fields?.length > 0 ? (
         template.fields.map((field, index) => (
           <View key={index} style={styles.fieldContainer}>
-            <Text style={styles.fieldName}>Field Name: {field.fieldName}</Text>
-            <Text style={styles.fieldType}>Field Type: {field.fieldType}</Text>
-            <Text style={styles.fieldRequired}>Required: {field.required ? 'Yes' : 'No'}</Text>
+            <Text style={styles.fieldName}>Name: {field.fieldName}</Text>
+            <Text style={styles.fieldDetail}>Type: {field.fieldType}</Text>
+            <Text style={styles.fieldDetail}>Required: {field.required ? 'Yes' : 'No'}</Text>
             {field.fieldType === 'dropdown' && field.options?.length > 0 && (
-              <Text style={styles.fieldOptions}>Options: {field.options.join(', ')}</Text>
+              <Text style={styles.fieldDetail}>Options: {field.options.join(', ')}</Text>
             )}
             <TouchableOpacity onPress={() => handleDeleteField(field.fieldName)} style={styles.deleteButton}>
               <Text style={styles.deleteButtonText}>Delete Field</Text>
@@ -142,7 +121,7 @@ export default function TemplateDetailScreen() {
       )}
 
       <View style={styles.addFieldContainer}>
-        <Text style={styles.fieldsHeader}>Add New Field</Text>
+        <Text style={styles.sectionTitle}>Add New Field</Text>
         <TextInput
           style={styles.input}
           placeholder="Field Name"
@@ -169,86 +148,139 @@ export default function TemplateDetailScreen() {
             onChangeText={(text) => setNewField({ ...newField, options: text })}
           />
         )}
-        <Button title="Add Field" onPress={handleAddField} />
+        <TouchableOpacity style={styles.addButton} onPress={handleAddField}>
+          <Text style={styles.addButtonText}>Add Field</Text>
+        </TouchableOpacity>
       </View>
     </ScrollView>
   );
 }
+
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
-    alignItems: 'center',
-    backgroundColor: '#f7f9f9',
-    padding: 20,
+    alignItems: "center",
+    backgroundColor: "#f0f4f8",
+    paddingTop: 40,
+    paddingHorizontal: 20,
   },
   loadingContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   header: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#00796b',
+    fontSize: 28,
+    fontWeight: "bold",
+    color: "#093a59",
     marginBottom: 20,
   },
-  templateName: {
+  templateInfoContainer: {
+    backgroundColor: "#ffffff",
+    padding: 15,
+    borderRadius: 10,
+    width: "100%",
+    marginBottom: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  templateInfo: {
     fontSize: 18,
-    fontWeight: 'bold',
-    color: '#00796b',
+    color: "#093a59",
     marginBottom: 10,
   },
-  specialty: {
-    fontSize: 16,
-    color: '#00796b',
+  boldText: {
+    fontWeight: "600",
+  },
+  sectionTitle: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#093a59",
     marginBottom: 20,
-  },
-  fieldsHeader: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#00796b',
-    marginBottom: 10,
   },
   fieldContainer: {
-    backgroundColor: '#e6f2ef',
-    padding: 15,
-    borderRadius: 8,
-    marginBottom: 10,
-    width: '100%',
+    backgroundColor: "#ffffff",
+    padding: 20,
+    borderRadius: 15,
+    marginBottom: 15,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 5,
+    width: "100%",
   },
   fieldName: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#00796b',
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#00796b",
   },
-  fieldType: {
-    fontSize: 14,
-    color: '#00796b',
-    marginTop: 2,
+  fieldDetail: {
+    fontSize: 18,
+    color: "#00796b",
+    marginTop: 8,
   },
-  fieldRequired: {
-    fontSize: 14,
-    color: '#00796b',
-    marginTop: 2,
+  deleteButton: {
+    marginTop: 15,
+    paddingVertical: 10,
+    borderRadius: 5,
+    backgroundColor: "#e74c3c",
+    alignItems: "center",
   },
-  fieldOptions: {
-    fontSize: 14,
-    color: '#00796b',
-    marginTop: 2,
+  deleteButtonText: {
+    color: "#fff",
+    fontWeight: "600",
   },
   noFieldsText: {
-    fontSize: 14,
-    color: '#00796b',
+    marginTop: 20,
+    fontSize: 18,
+    color: "#00796b",
+    textAlign: "center",
+  },
+  addFieldContainer: {
+    backgroundColor: "#ffffff",
+    padding: 20,
+    borderRadius: 15,
+    width: "100%",
+    marginBottom: 40,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  input: {
+    height: 45,
+    borderColor: "#b2bec3",
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    backgroundColor: "#fff",
+    marginBottom: 15,
+    color: "#093a59",
+  },
+  addButton: {
+    paddingVertical: 15,
+    borderRadius: 5,
+    backgroundColor: "#14967f",
+    alignItems: "center",
     marginTop: 10,
+  },
+  addButtonText: {
+    color: "#fff",
+    fontWeight: "600",
+    fontSize: 16,
   },
   errorContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
-  errorMessage: {
-    color: 'red',
-    fontSize: 16,
-    textAlign: 'center',
+  errorText: {
+    color: "red",
+    fontSize: 18,
   },
 });
