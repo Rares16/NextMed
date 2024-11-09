@@ -5,6 +5,7 @@ import {
   TextInput,
   Text,
   TouchableOpacity,
+  Image,
   Dimensions,
 } from "react-native";
 import { Formik } from "formik";
@@ -14,6 +15,8 @@ import { useMutation } from "@tanstack/react-query";
 import { loginUser } from "./(services)/api/api";
 import { useDispatch, useSelector } from "react-redux";
 import { loginAction } from "./(redux)/authSlice";
+
+import logoStyle from "../styles/logo";
 
 // Calculate 80% of screen width for consistent width
 const screenWidth = Dimensions.get("window").width;
@@ -29,8 +32,8 @@ const colors = {
 };
 
 const LoginSchema = Yup.object().shape({
-  email: Yup.string().email("Invalid email").required("Required"),
-  password: Yup.string().min(6, "Too Short!").required("Required"),
+  email: Yup.string().email("Invalid email").required("Email is required"),
+  password: Yup.string().min(6, "Too Short!").required("Password is required"),
 });
 
 export default function Login() {
@@ -54,7 +57,7 @@ export default function Login() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>NextMed Login</Text>
+      <Image source={require('../assets/logo.png')} style={logoStyle} />
       <Formik
         initialValues={{ email: "", password: "" }}
         validationSchema={LoginSchema}
