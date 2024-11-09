@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const DB_URL = "https://curvy-ways-tickle.loca.lt/"; // Use the IP address of the computer running the server
+const DB_URL = "https://good-wasps-fetch.loca.lt/"; // Use the IP address of the computer running the server
 
 // Login User
 export const loginUser = async (user) => {

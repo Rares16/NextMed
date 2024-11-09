@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity, FlatList, Dimensions, ActivityIndicator } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { getDoctorInfo } from '../(services)/api/api';
-import { Stack, useRouter, useLocalSearchParams, useGlobalSearchParams } from 'expo-router'
+import { useLocalSearchParams } from 'expo-router';
+
 const { height } = Dimensions.get('window');
 
 const ProfileScreen = () => {
@@ -15,6 +15,7 @@ const ProfileScreen = () => {
       const fetchDoctorInfo = async () => {
         try {
           const doctorData = await getDoctorInfo(doctorId);
+          console.log("Fetched Doctor Data:", doctorData); // Add a console log to see the data
           setDoctor(doctorData);
         } catch (error) {
           console.error('Error fetching doctor data', error);
@@ -55,19 +56,28 @@ const ProfileScreen = () => {
         />
       </View>
       <Text style={styles.profileName}>Dr. {doctor.name}</Text>
+      <Text style={styles.profileHospital}>Hospital: {doctor.hospital}</Text>
 
       {/* Display the list of patients */}
-      <FlatList
-        data={doctor.patients || []}
-        keyExtractor={(item, index) => item._id || index.toString()}
-        renderItem={({ item }) => (
-          <TouchableOpacity style={styles.patientItem} onPress={() => console.log('Navigate to Patient:', item._id)}>
-            <Text style={styles.patientName}>{item.name}</Text>
-            <Text style={styles.patientAge}>Age: {item.age}</Text>
-          </TouchableOpacity>
-        )}
-        contentContainerStyle={styles.patientList}
-      />
+      <Text style={styles.sectionTitle}>Patients</Text>
+      {doctor.patients && doctor.patients.length > 0 ? (
+        <FlatList
+          data={doctor.patients}
+          keyExtractor={(item) => item._id}
+          renderItem={({ item }) => (
+            <TouchableOpacity style={styles.patientItem} onPress={() => console.log('Navigate to Patient:', item._id)}>
+              <Text style={styles.patientName}>{item.name}</Text>
+              <Text style={styles.patientAge}>
+                Age: {item.fields && item.fields['Patient Age'] ? item.fields['Patient Age'] : 'N/A'}
+              </Text>
+            </TouchableOpacity>
+          )}
+          contentContainerStyle={styles.patientList}
+        />
+      ) : (
+        // Corrected fallback for no patients assigned
+        <Text style={styles.noPatientsText}>No patients assigned yet.</Text>
+      )}
     </View>
   );
 };
@@ -100,7 +110,19 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#00796b',
     marginTop: 10,
+    marginBottom: 10,
+  },
+  profileHospital: {
+    fontSize: 18,
+    color: '#00796b',
     marginBottom: 20,
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#00796b',
+    marginTop: 30,
+    marginBottom: 10,
   },
   patientList: {
     width: '100%',
@@ -110,7 +132,7 @@ const styles = StyleSheet.create({
   patientItem: {
     backgroundColor: '#e6f2ef',
     paddingVertical: 15,
-    paddingHorizontal: 80,
+    paddingHorizontal: 20,
     borderRadius: 8,
     marginBottom: 10,
     shadowColor: '#000',
@@ -138,5 +160,10 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  noPatientsText: {
+    marginTop: 20,
+    fontSize: 16,
+    color: '#00796b',
   },
 });
