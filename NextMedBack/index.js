@@ -4,7 +4,8 @@ require('dotenv').config(); // Load environment variables
 const express = require('express');
 const mongoose = require('mongoose');
 const app = express();
-
+const patientRoutes = require('./routes/patientRoutes');
+app.use('/api/patient', patientRoutes);
 // Import routes
 const authRoutes = require('./routes/authRoutes');
 const templateRoutes = require('./routes/templateRoutes'); // Import template routes
