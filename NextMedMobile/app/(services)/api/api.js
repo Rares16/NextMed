@@ -81,3 +81,68 @@ export const getCustomizedTemplates = async (doctorId) => {
       throw error;
     }
   };
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+export const uploadAudioForTranscription = async (audioFileUri) => {
+    try {
+      console.log('Starting uploadAudioForTranscription function...');
+  
+      // Log the URI of the audio file received
+      console.log('Audio file URI:', audioFileUri);
+  
+      if (!audioFileUri) {
+        console.error('No audio file URI provided');
+        throw new Error('No audio file URI provided');
+      }
+  
+      // Creating FormData to send the audio file
+      const formData = new FormData();
+      const audioFileObject = {
+        uri: audioFileUri,
+        name: 'recording.3gp', // Use the appropriate file extension
+        type: 'audio/3gp',     // Correct MIME type for .3gp format
+      };
+  
+      // Append the audio file to formData
+      formData.append('audio', audioFileObject);
+  
+      // Log the formData details manually
+      console.log('FormData content:');
+      console.log('Field Name:', 'audio');
+      console.log('File Data:', audioFileObject);
+  
+      // Sending POST request to the backend server
+      console.log('Sending POST request to backend...');
+      const response = await axios.post(`${DB_URL}api/transcription/upload-audio`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+  
+      // Log the response from the server
+      console.log('Upload successful. Response data:', response.data);
+  
+      return response.data;
+    } catch (error) {
+      // Log the complete error object for better debugging
+      console.error('Error uploading audio for transcription:', error);
+      console.error('Error details:', error.message);
+      console.error('Error code:', error.code);
+  
+      if (error.response) {
+        console.error('Error response data:', error.response.data);
+        console.error('Error response status:', error.response.status);
+        console.error('Error response headers:', error.response.headers);
+      } else if (error.request) {
+        console.error('Error request:', error.request);
+      } else {
+        console.error('Error message:', error.message);
+      }
+  
+      throw error;
+    }
+  };
+  
