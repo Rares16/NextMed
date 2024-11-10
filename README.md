@@ -1,6 +1,6 @@
 # NextMed Application 📱💉
 
-![NextMed Logo](https://via.placeholder.com/150) <!-- You can replace this with your actual logo -->
+![NextMed Logo](https://ibb.co/QK8qdZy) <!-- You can replace this with your actual logo -->
 
 [![Node.js](https://img.shields.io/badge/Node.js-14%2B-green)](https://nodejs.org/)
 [![React Native](https://img.shields.io/badge/React%20Native-0.63-blue)](https://reactnative.dev/)
@@ -23,7 +23,7 @@ The project is comprised of:
 - A **mobile application** for doctors (built with **React Native**).
 - A **backend server** for data storage and processing (built with **Node.js** and **MongoDB**).
 
-![NextMed Workflow](https://via.placeholder.com/800x300) <!-- Add workflow images if available -->
+![NextMed Workflow] <!-- Add workflow images if available -->
 
 ---
 
