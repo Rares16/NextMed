@@ -15,6 +15,7 @@ export default function PatientProfileScreen() {
       const fetchPatientInfo = async () => {
         try {
           const patientData = await getPatientInfo(patientId);
+          console.log('Fetched Patient Data:', patientData); // Debugging line to ensure data is fetched
           setPatient(patientData);
         } catch (error) {
           console.error('Error fetching patient data:', error);
@@ -47,24 +48,19 @@ export default function PatientProfileScreen() {
     <SafeAreaView style={{ flex: 1 }}>
       <ScrollView contentContainerStyle={PatientProfileStyles.container}>
         <Text style={PatientProfileStyles.header}>Patient Profile</Text>
-        <Text style={PatientProfileStyles.patientName}>{patient.name}</Text>
-        <Text style={PatientProfileStyles.patientAge}>Age: {patient.age}</Text>
-        <Text style={PatientProfileStyles.patientGender}>Gender: {patient.gender}</Text>
+        <Text style={PatientProfileStyles.patientName}>Name: {patient.name || 'N/A'}</Text>
+        <Text style={PatientProfileStyles.patientAge}>Age: {patient.fields?.['Patient Age'] || 'N/A'}</Text>
+        <Text style={PatientProfileStyles.patientGender}>Gender: {patient.gender || 'N/A'}</Text>
 
-        <Text style={PatientProfileStyles.sectionTitle}>Medical History</Text>
-        <Text style={PatientProfileStyles.sectionContent}>{patient.medicalHistory || 'No history available.'}</Text>
+        <Text style={PatientProfileStyles.sectionTitle}>Symptoms</Text>
+        <Text style={PatientProfileStyles.sectionContent}>
+          {patient.fields?.['Symptoms'] || 'No symptoms available.'}
+        </Text>
 
-        <Text style={PatientProfileStyles.sectionTitle}>Allergies</Text>
-        <Text style={PatientProfileStyles.sectionContent}>{patient.allergies || 'No allergies reported.'}</Text>
-
-        <Text style={PatientProfileStyles.sectionTitle}>Prescriptions</Text>
-        {patient.prescriptions?.length > 0 ? (
-          patient.prescriptions.map((prescription, index) => (
-            <Text key={index} style={PatientProfileStyles.sectionContent}>{prescription}</Text>
-          ))
-        ) : (
-          <Text style={PatientProfileStyles.sectionContent}>No prescriptions available.</Text>
-        )}
+        <Text style={PatientProfileStyles.sectionTitle}>Previous Pregnancy Complications</Text>
+        <Text style={PatientProfileStyles.sectionContent}>
+          {patient.fields?.['Previous Pregnancy Complications'] || 'N/A'}
+        </Text>
 
         <TouchableOpacity
           style={PatientProfileStyles.backButton}

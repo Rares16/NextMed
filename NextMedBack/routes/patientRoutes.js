@@ -1,6 +1,9 @@
 // patientroutes.js
 const AWS = require('aws-sdk');
+const mongoose = require('mongoose');
 const multer = require('multer');
+const Patient = require('../model/Patient');
+const Doctor = require('../model/Doctor'); // Import the Doctor model
 const express = require('express');
 const router = express.Router();
 const { getTranscriptionResultFromS3, extractTranscriptionText, createPatientProfile } = require('../model/Transcription');
@@ -67,5 +70,35 @@ router.post('/upload-audio', upload.single('audio'), async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
-
-module.exports = router;
+router.get('/:id', async (req, res) => {
+    try {
+      const patientId = req.params.id;
+  
+      // Validate the patient ID
+      if (!mongoose.Types.ObjectId.isValid(patientId)) {
+        return res.status(400).json({ message: 'Invalid patient ID format' });
+      }
+  
+      // Find the patient by ID and make sure fields are included
+      const patient = await Patient.findById(patientId).lean(); // Use lean() for a plain JavaScript object
+      if (!patient) {
+        return res.status(404).json({ message: 'Patient not found' });
+      }
+  
+      // Optionally, attach additional doctor information if required
+      const doctor = await Doctor.findById(patient.doctorId).lean();
+  
+      // Constructing the full patient data, including the doctor if available
+      const patientData = {
+        ...patient,
+        doctor: doctor ? doctor : null,
+      };
+  
+      // Sending patient data back
+      res.status(200).json(patientData);
+    } catch (error) {
+      console.error('Server error:', error);
+      res.status(500).json({ message: 'Server error. Please try again later.' });
+    }
+  });
+  module.exports = router;

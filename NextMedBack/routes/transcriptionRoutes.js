@@ -90,27 +90,29 @@ router.post('/upload-audio', upload.single('audio'), async (req, res) => {
         // Step 7: Map entities to fields
         const patientData = {};
         entities.forEach(entity => {
-          switch (entity.Type) {
-            case 'PERSON':
-              patientData.name = entity.Text;
-              break;
-            case 'QUANTITY':
-              if (entity.Text.includes('years')) {
-                patientData.age = entity.Text.replace('years old', '').trim();
-              }
-              break;
-            case 'SYMPTOM':
-              patientData.symptoms = patientData.symptoms ? `${patientData.symptoms}, ${entity.Text}` : entity.Text;
-              break;
-            case 'EVENT':
-              if (entity.Text.toLowerCase().includes('abortion')) {
-                patientData.previousPregnancyComplications = entity.Text;
-              }
-              break;
-            // Add more cases as needed for other fields
-          }
-        });
-
+            console.log(`Entity Type: ${entity.Type}, Text: ${entity.Text}`);
+            switch (entity.Type) {
+              case 'PERSON':
+                patientData.name = entity.Text;
+                break;
+              case 'QUANTITY':
+                if (entity.Text.includes('years')) {
+                  patientData.age = entity.Text.replace('years old', '').trim();
+                }
+                break;
+              case 'SYMPTOM':
+                patientData.symptoms = patientData.symptoms ? `${patientData.symptoms}, ${entity.Text}` : entity.Text;
+                break;
+              case 'EVENT':
+                if (entity.Text.toLowerCase().includes('abortion')) {
+                  patientData.previousPregnancyComplications = entity.Text;
+                }
+                break;
+              default:
+                console.warn(`Unhandled entity type: ${entity.Type}`);
+                break;
+            }
+          });
         // Step 8: Create Patient Profile
         const newPatient = new Patient({
           name: patientData.name || 'Unknown',

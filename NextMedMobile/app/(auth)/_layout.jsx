@@ -15,14 +15,6 @@ export default function AuthLayout() {
         }}
       >
         <Tabs.Screen
-          name="dashboard" // Must match file name (HomeScreen.jsx)
-          options={{
-            tabBarLabel: 'Home',
-            tabBarIcon: ({ color }) => <MaterialIcons name="home" size={24} color={color} />,
-            headerShown : false
-          }}
-        />
-        <Tabs.Screen
           name="TemplateScreen" // Ensure this matches file name (TemplatesScreen.jsx)
           options={{
             tabBarLabel: 'Templates',
