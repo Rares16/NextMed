@@ -117,7 +117,7 @@ router.post('/upload-audio', upload.single('audio'), async (req, res) => {
         const newPatient = new Patient({
           name: patientData.name || 'Unknown',
           templateId: req.body.templateId,
-          doctorId: req.body.doctorId, // <-- Include doctorId here to link the patient to a doctor
+          doctorId: req.body.doctorId,
           fields: {
             'Patient Age': patientData.age || 'N/A',
             'Symptoms': patientData.symptoms || 'N/A',

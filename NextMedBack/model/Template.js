@@ -19,7 +19,7 @@ const templateSchema = new mongoose.Schema({
       fieldName: { type: String, required: true },
       fieldType: { type: String, enum: ['text', 'number', 'date', 'boolean', 'dropdown'], required: true },
       required: { type: Boolean, default: false },
-      options: { type: [String], default: [] }, // Options for dropdown fields
+      options: { type: [String], default: [] },
     },
   ],
   createdAt: {

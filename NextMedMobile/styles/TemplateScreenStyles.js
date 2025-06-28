@@ -36,7 +36,7 @@ export const TemplateScreenStyles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 8,
     width: '100%',
-    elevation: 5, // Adds depth to each card
+    elevation: 5,
   },
   templateName: {
     fontSize: 18,

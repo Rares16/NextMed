@@ -1,7 +1,7 @@
 require('dotenv').config();
-const bcrypt = require('bcrypt'); // Import bcrypt
-const jwt = require('jsonwebtoken'); // Import jsonwebtoken
-const Doctor = require('../model/Doctor'); // Importing the Doctor model
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const Doctor = require('../model/Doctor');
 
 const JWT_SECRET = process.env.JWT_SECRET;
 

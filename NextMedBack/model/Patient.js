@@ -10,7 +10,7 @@ const PatientSchema = new mongoose.Schema({
   doctorId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Doctor',
-    required: true // Ensure every patient has an associated doctor
+    required: true
   },
   fields: {
     type: Map,

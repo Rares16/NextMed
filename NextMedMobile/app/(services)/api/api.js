@@ -38,7 +38,7 @@ export const getDoctorInfo = async (doctorId) => {
 };
 export const getPatientInfo = async (patientID) => {
   try {
-    console.log('Fetching data for patient ID:', patientID); // Log patientID
+    console.log('Fetching data for patient ID:', patientID);
     const response = await axios.get(
       `${DB_URL}api/patient/${patientID}`,
       {
@@ -47,7 +47,7 @@ export const getPatientInfo = async (patientID) => {
         }
       }
     );
-    console.log('Response:', response.data); // Log response to see the data
+    console.log('Response:', response.data);
     return response.data;
   } catch (error) {
     console.error(`Error fetching patient information for ID: ${patientID}`, error);
@@ -101,12 +101,12 @@ export const updateTemplateById = async (templateId, updates, doctorId) => {
     // Combine updates and doctorId into a single request body object
     const requestBody = {
       ...updates,
-      ...(doctorId && { doctorId }) // Only include doctorId if it's provided
+      ...(doctorId && { doctorId })
     };
 
     const response = await axios.patch(
       `${DB_URL}templates/${templateId}`,
-      requestBody, // Send as single object
+      requestBody,
       config
     );
     
@@ -148,8 +148,8 @@ export const uploadAudioForTranscription = async (audioFileUri) => {
       const formData = new FormData();
       const audioFileObject = {
         uri: audioFileUri,
-        name: 'recording.3gp', // Use the appropriate file extension
-        type: 'audio/3gp',     // Correct MIME type for .3gp format
+        name: 'recording.3gp',
+        type: 'audio/3gp',
       };
   
       // Append the audio file to formData

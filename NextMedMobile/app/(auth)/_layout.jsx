@@ -2,7 +2,7 @@
 import React from 'react';
 import { Tabs } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
-import PrivateRoute from '../components/PrivateRoute'; // Ensure the correct path
+import PrivateRoute from '../components/PrivateRoute';
 
 export default function AuthLayout() {
   return (
@@ -15,7 +15,7 @@ export default function AuthLayout() {
         }}
       >
         <Tabs.Screen
-          name="TemplateScreen" // Ensure this matches file name (TemplatesScreen.jsx)
+          name="TemplateScreen"
           options={{
             tabBarLabel: 'Templates',
             tabBarIcon: ({ color }) => <MaterialIcons name="description" size={24} color={color} />,
@@ -23,7 +23,7 @@ export default function AuthLayout() {
           }}
         />
         <Tabs.Screen
-          name="AudioRecordingScreen" // Ensure this matches file name (TemplatesScreen.jsx)
+          name="AudioRecordingScreen"
           options={{
             tabBarLabel: 'Record',
             tabBarIcon: ({ color }) => <MaterialIcons name="mic" size={24} color={color} />,
@@ -31,7 +31,7 @@ export default function AuthLayout() {
           }}
         />
         <Tabs.Screen
-          name="profile" // Must match file name (ProfileScreen.jsx)
+          name="profile"
           options={{
             tabBarLabel: 'Profile',
             tabBarIcon: ({ color }) => <MaterialIcons name="person" size={24} color={color} />,

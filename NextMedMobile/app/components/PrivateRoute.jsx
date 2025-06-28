@@ -9,8 +9,8 @@ const PrivateRoute = ({ children }) => {
 
   if (!user) {
     // Redirect to login if user is not authenticated
-    router.replace('../index'); // Make sure this matches your login route
-    return null; // Return null to render nothing during redirect
+    router.replace('../index');
+    return null;
   }
 
   // Render children if the user is authenticated

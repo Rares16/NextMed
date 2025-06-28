@@ -77,7 +77,7 @@ export default function Login() {
           initialValues={{ email: "", password: "" }}
           validationSchema={LoginSchema}
           onSubmit={(values) => {
-            setErrorMessage(null); // Reset error message before attempt
+            setErrorMessage(null);
 
             // Perform the login mutation
             mutation

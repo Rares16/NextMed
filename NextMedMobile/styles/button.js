@@ -1,6 +1,6 @@
 // styles/button.js
 import { StyleSheet } from 'react-native';
-import { colors } from './colors'; // Import shared colors file
+import { colors } from './colors';
 
 const buttonStyle = StyleSheet.create({
   button: {

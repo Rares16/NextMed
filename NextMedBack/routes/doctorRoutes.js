@@ -26,7 +26,7 @@ router.get('/:id', async (req, res) => {
     // Attach patients to the doctor object before sending it back
     const doctorData = {
       ...doctor.toObject(),
-      patients: patients, // Add the patients array to the doctor data
+      patients: patients,
     };
 
     res.json(doctorData);

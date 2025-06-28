@@ -80,7 +80,7 @@ router.get('/:id', async (req, res) => {
       }
   
       // Find the patient by ID and make sure fields are included
-      const patient = await Patient.findById(patientId).lean(); // Use lean() for a plain JavaScript object
+      const patient = await Patient.findById(patientId).lean();
       if (!patient) {
         return res.status(404).json({ message: 'Patient not found' });
       }

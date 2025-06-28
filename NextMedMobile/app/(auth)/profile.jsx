@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useSelector } from "react-redux";
 import { View, Text, Image, TouchableOpacity, FlatList, ActivityIndicator, Dimensions } from 'react-native';
 import { getDoctorInfo } from '../(services)/api/api';
-import { useRouter } from 'expo-router'; // Import useRouter for navigation
-import { ProfileScreenStyles } from '../../styles/ProfileScreenStyles'; // Import refactored styles
+import { useRouter } from 'expo-router';
+import { ProfileScreenStyles } from '../../styles/ProfileScreenStyles';
 
 const { width, height } = Dimensions.get('window');
 
@@ -77,7 +77,7 @@ const ProfileScreen = () => {
           renderItem={({ item }) => (
             <TouchableOpacity
               style={ProfileScreenStyles.patientItem}
-              onPress={() => handlePatientPress(item._id)} // Navigate to patient profile
+              onPress={() => handlePatientPress(item._id)}
             >
               <Text style={ProfileScreenStyles.patientName}>{item.name}</Text>
               <Text style={ProfileScreenStyles.patientAge}>
