@@ -31,8 +31,8 @@ async function uploadAudioToS3(file) {
 async function startTranscription(audioFileUrl) {
   const transcribeParams = {
     TranscriptionJobName: `transcription_${Date.now()}`,
-    LanguageCode: 'en-US', // Adjust if necessary
-    MediaFormat: 'mp3', // Ensure the uploaded file is in this format
+    LanguageCode: 'en-US',
+    MediaFormat: 'mp3',
     Media: { MediaFileUri: audioFileUrl },
     OutputBucketName: process.env.S3_BUCKET_NAME,
   };

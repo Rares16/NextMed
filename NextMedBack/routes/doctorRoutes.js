@@ -10,7 +10,6 @@ router.get('/:id', async (req, res) => {
   try {
     const doctorId = req.params.id;
 
-    // Validate the doctor ID
     if (!mongoose.Types.ObjectId.isValid(doctorId)) {
       return res.status(400).json({ message: 'Invalid doctor ID format' });
     }

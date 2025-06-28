@@ -1,18 +1,21 @@
 import React, { useEffect, useState } from 'react';
+import { useSelector } from "react-redux";
 import { View, Text, Image, TouchableOpacity, FlatList, ActivityIndicator, Dimensions } from 'react-native';
 import { getDoctorInfo } from '../(services)/api/api';
-import { useLocalSearchParams, useRouter } from 'expo-router'; // Import useRouter for navigation
+import { useRouter } from 'expo-router'; // Import useRouter for navigation
 import { ProfileScreenStyles } from '../../styles/ProfileScreenStyles'; // Import refactored styles
 
 const { width, height } = Dimensions.get('window');
 
 const ProfileScreen = () => {
-  const { doctorId } = useLocalSearchParams(); // Extract doctorId from query parameters
+  const user = useSelector((state) => state.auth.user);
+  const doctorId = user?.id;
   const [doctor, setDoctor] = useState(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter(); // Hook to handle navigation
 
   useEffect(() => {
+    console.log("Doctor id now:", doctorId);
     if (doctorId) {
       const fetchDoctorInfo = async () => {
         try {
@@ -58,7 +61,7 @@ const ProfileScreen = () => {
     <View style={ProfileScreenStyles.container}>
       <View style={ProfileScreenStyles.profileImageContainer}>
         <Image
-          source={{ uri: doctor.profileImage || 'https://ih1.redbubble.net/image.2382029195.6138/flat,750x,075,f-pad,750x1000,f8f8f8.webp' }}
+          source={{ uri: doctor.profileImage || 'https://www.shutterstock.com/image-vector/doctor-icon-260nw-224509450.jpg' }}
           style={ProfileScreenStyles.profileImage}
         />
       </View>

@@ -3,7 +3,7 @@ const multer = require('multer');
 const express = require('express');
 const router = express.Router();
 const { getTranscriptionResultFromS3, extractTranscriptionText } = require('../model/Transcription');
-const Patient = require('../model/Patient');
+const Patient = require('../model/Patient');  
 
 AWS.config.update({
   accessKeyId: process.env.AWS_ACCESS_KEY_ID,

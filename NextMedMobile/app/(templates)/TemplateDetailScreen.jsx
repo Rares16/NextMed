@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 import {
   View,
   Text,
@@ -6,26 +7,55 @@ import {
   ActivityIndicator,
   ScrollView,
   TouchableOpacity,
-  StyleSheet,
+  KeyboardAvoidingView,
+  Platform,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from 'react-native';
-import { useLocalSearchParams, useNavigation } from 'expo-router'; // Add useNavigation if using Expo Router
-import { getTemplateById, updateTemplateById } from '../(services)/api/api';
+import { useLocalSearchParams, useNavigation } from 'expo-router';
+import { getTemplateById, updateTemplateById, deleteTemplateById } from '../(services)/api/api';
+import styles from '../../styles/TemplateDetailStyles'; // Your external styles file
 
 export default function TemplateDetailScreen() {
+  const [doctorId, setDoctorId] = useState(null);
+  const user = useSelector((state) => state.auth.user);
+
+  useEffect(() => {
+    if (user?.id) {
+      setDoctorId(user.id);
+      console.log('Doctor ID set from Redux:', user.id);
+    } else {
+      console.log('No user data available.');
+    }
+  }, [user]);
+
+  //console.log('Doctor ID:', doctorId);
   const { templateId } = useLocalSearchParams();
-  const navigation = useNavigation(); // Access navigation for back button
+  const navigation = useNavigation();
   const [template, setTemplate] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [newField, setNewField] = useState({ fieldName: '', fieldType: '', required: false, options: [] });
+  const [newField, setNewField] = useState({
+    fieldName: '',
+    fieldType: '',
+    required: false,
+    options: '',
+  });
+  const [isCustomTemplate, setIsCustomTemplate] = useState(false);
+
+    // When fetching template:
+    useEffect(() => {
+      if (template?.doctorId) {
+        setIsCustomTemplate(true);
+      }
+    }, [template]);
+
 
   useEffect(() => {
     const fetchTemplate = async () => {
       try {
         setLoading(true);
-        if (!templateId) {
-          throw new Error('Template ID is missing.');
-        }
+        if (!templateId) throw new Error('Template ID is missing.');
         const fetchedTemplate = await getTemplateById(templateId);
         setTemplate(fetchedTemplate);
       } catch (err) {
@@ -37,6 +67,16 @@ export default function TemplateDetailScreen() {
     fetchTemplate();
   }, [templateId]);
 
+  const handleDelete = async (templateId) => {
+    try {
+      if (!templateId) throw new Error('Template ID is missing when trying to delete this template.');
+      const result = await deleteTemplateById(templateId);
+      console.log('Deleted:', result);
+    } catch (error) {
+      console.error('Delete failed:', error.message);
+    }
+  };
+  
   const handleAddField = async () => {
     try {
       const updates = {
@@ -46,11 +86,14 @@ export default function TemplateDetailScreen() {
             fieldName: newField.fieldName,
             fieldType: newField.fieldType,
             required: newField.required,
-            options: newField.fieldType === 'dropdown' ? newField.options.split(',').map(opt => opt.trim()) : [],
+            options:
+              newField.fieldType === 'dropdown'
+                ? newField.options.split(',').map((opt) => opt.trim())
+                : [],
           },
         ],
       };
-      const updatedTemplate = await updateTemplateById(templateId, updates);
+      const updatedTemplate = await updateTemplateById(templateId, updates,doctorId);
       setTemplate(updatedTemplate);
       setNewField({ fieldName: '', fieldType: '', required: false, options: '' });
     } catch (err) {
@@ -61,14 +104,8 @@ export default function TemplateDetailScreen() {
   const handleDeleteField = async (fieldName) => {
     try {
       if (!templateId) throw new Error('Template ID is missing when trying to delete a field.');
-
       const updates = {
-        fields: [
-          {
-            action: 'remove',
-            fieldName,
-          },
-        ],
+        fields: [{ action: 'remove', fieldName }],
       };
       const updatedTemplate = await updateTemplateById(templateId, updates);
       setTemplate(updatedTemplate);
@@ -94,212 +131,103 @@ export default function TemplateDetailScreen() {
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      {/* Back Button */}
-      <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-        <Text style={styles.backButtonText}>Back</Text>
-      </TouchableOpacity>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={{ flex: 1 }}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 20}
+    >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+          {/* Back Button */}
+          <View style={styles.topActionBar}>
+            <TouchableOpacity style={[styles.actionButton, styles.backButton]} onPress={() => navigation.goBack()}>
+              <Text style={styles.actionButtonText}>Back</Text>
+            </TouchableOpacity>
 
-      <Text style={styles.header}>Template Details</Text>
-      <View style={styles.templateInfoContainer}>
-        <Text style={styles.templateInfo}>Name: <Text style={styles.boldText}>{template.name}</Text></Text>
-        <Text style={styles.templateInfo}>Specialty: <Text style={styles.boldText}>{template.specialty}</Text></Text>
-      </View>
-
-      <Text style={styles.sectionTitle}>Fields:</Text>
-      {template.fields?.length > 0 ? (
-        template.fields.map((field, index) => (
-          <View key={index} style={styles.fieldContainer}>
-            <Text style={styles.fieldName}>Name: {field.fieldName}</Text>
-            <Text style={styles.fieldDetail}>Type: {field.fieldType}</Text>
-            <Text style={styles.fieldDetail}>Required: {field.required ? 'Yes' : 'No'}</Text>
-            {field.fieldType === 'dropdown' && field.options?.length > 0 && (
-              <Text style={styles.fieldDetail}>Options: {field.options.join(', ')}</Text>
+            {isCustomTemplate && (
+              <TouchableOpacity style={[styles.actionButton, styles.deleteButton]} 
+              onPress={() =>{
+                handleDelete(templateId),
+                navigation.goBack()
+                }
+              }
+              >
+                <Text style={styles.actionButtonText}>Delete</Text>
+              </TouchableOpacity>
             )}
-            <TouchableOpacity onPress={() => handleDeleteField(field.fieldName)} style={styles.deleteButton}>
-              <Text style={styles.deleteButtonText}>Delete Field</Text>
+          </View>
+
+          <Text style={styles.header}>Template Details</Text>
+
+          <View style={styles.templateInfoContainer}>
+            <Text style={styles.templateInfo}>
+              Name: <Text style={styles.boldText}>{template.name}</Text>
+            </Text>
+            <Text style={styles.templateInfo}>
+              Specialty: <Text style={styles.boldText}>{template.specialty}</Text>
+            </Text>
+          </View>
+
+          <Text style={styles.sectionTitle}>Fields:</Text>
+          {template.fields?.length > 0 ? (
+            template.fields.map((field, index) => (
+              <View key={index} style={styles.fieldContainer}>
+                <Text style={styles.fieldName}>Name: {field.fieldName}</Text>
+                <Text style={styles.fieldDetail}>Type: {field.fieldType}</Text>
+                <Text style={styles.fieldDetail}>
+                  Required: {field.required ? 'Yes' : 'No'}
+                </Text>
+                {field.fieldType === 'dropdown' && field.options?.length > 0 && (
+                  <Text style={styles.fieldDetail}>Options: {field.options.join(', ')}</Text>
+                )}
+                <TouchableOpacity
+                  onPress={() => handleDeleteField(field.fieldName)}
+                  style={styles.deleteButton}
+                >
+                  <Text style={styles.deleteButtonText}>Delete Field</Text>
+                </TouchableOpacity>
+              </View>
+            ))
+          ) : (
+            <Text style={styles.noFieldsText}>No fields available.</Text>
+          )}
+
+          <View style={styles.addFieldContainer}>
+            <Text style={styles.sectionTitle}>Add New Field</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Field Name"
+              value={newField.fieldName}
+              onChangeText={(text) => setNewField({ ...newField, fieldName: text })}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Field Type (text, number, date, dropdown)"
+              value={newField.fieldType}
+              onChangeText={(text) => setNewField({ ...newField, fieldType: text })}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Required? (true/false)"
+              value={newField.required.toString()}
+              onChangeText={(text) =>
+                setNewField({ ...newField, required: text.toLowerCase() === 'true' })
+              }
+            />
+            {newField.fieldType === 'dropdown' && (
+              <TextInput
+                style={styles.input}
+                placeholder="Options (comma-separated)"
+                value={newField.options}
+                onChangeText={(text) => setNewField({ ...newField, options: text })}
+              />
+            )}
+            <TouchableOpacity style={styles.addButton} onPress={handleAddField}>
+              <Text style={styles.addButtonText}>Add Field</Text>
             </TouchableOpacity>
           </View>
-        ))
-      ) : (
-        <Text style={styles.noFieldsText}>No fields available.</Text>
-      )}
-
-      <View style={styles.addFieldContainer}>
-        <Text style={styles.sectionTitle}>Add New Field</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Field Name"
-          value={newField.fieldName}
-          onChangeText={(text) => setNewField({ ...newField, fieldName: text })}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Field Type (text, number, date, dropdown)"
-          value={newField.fieldType}
-          onChangeText={(text) => setNewField({ ...newField, fieldType: text })}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Required? (true/false)"
-          value={newField.required.toString()}
-          onChangeText={(text) => setNewField({ ...newField, required: text.toLowerCase() === 'true' })}
-        />
-        {newField.fieldType === 'dropdown' && (
-          <TextInput
-            style={styles.input}
-            placeholder="Options (comma-separated)"
-            value={newField.options}
-            onChangeText={(text) => setNewField({ ...newField, options: text })}
-          />
-        )}
-        <TouchableOpacity style={styles.addButton} onPress={handleAddField}>
-          <Text style={styles.addButtonText}>Add Field</Text>
-        </TouchableOpacity>
-      </View>
-    </ScrollView>
+        </ScrollView>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flexGrow: 1,
-    alignItems: "center",
-    backgroundColor: "#f0f4f8",
-    paddingTop: 40,
-    paddingHorizontal: 20,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  header: {
-    fontSize: 28,
-    fontWeight: "bold",
-    color: "#093a59",
-    marginBottom: 20,
-  },
-  backButton: {
-    alignSelf: 'flex-start',
-    marginBottom: 20,
-    backgroundColor: '#14967f',
-    padding: 10,
-    borderRadius: 5,
-  },
-  backButtonText: {
-    color: '#fff',
-    fontWeight: '600',
-  },
-  templateInfoContainer: {
-    backgroundColor: "#ffffff",
-    padding: 15,
-    borderRadius: 10,
-    width: "100%",
-    marginBottom: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  templateInfo: {
-    fontSize: 18,
-    color: "#093a59",
-    marginBottom: 10,
-  },
-  boldText: {
-    fontWeight: "600",
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#093a59",
-    marginBottom: 20,
-  },
-  fieldContainer: {
-    backgroundColor: "#ffffff",
-    padding: 20,
-    borderRadius: 15,
-    marginBottom: 15,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 5,
-    width: "100%",
-  },
-  fieldName: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#00796b",
-  },
-  fieldDetail: {
-    fontSize: 18,
-    color: "#00796b",
-    marginTop: 8,
-  },
-  deleteButton: {
-    marginTop: 15,
-    paddingVertical: 10,
-    borderRadius: 5,
-    backgroundColor: "#e74c3c",
-    alignItems: "center",
-  },
-  deleteButtonText: {
-    color: "#fff",
-    fontWeight: "600",
-  },
-  noFieldsText: {
-    marginTop: 20,
-    fontSize: 18,
-    color: "#00796b",
-    textAlign: "center",
-  },
-  addFieldContainer: {
-    backgroundColor: "#ffffff",
-    padding: 20,
-    borderRadius: 15,
-    width: "100%",
-    marginBottom: 40,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  input: {
-    height: 45,
-    borderColor: "#ddd",
-    borderWidth: 1,
-    borderRadius: 5,
-    padding: 10,
-    fontSize: 16,
-    color: "#444",
-    backgroundColor: "#f9f9f9",
-    marginTop: 10,
-  },
-  addButton: {
-    backgroundColor: "#14967f",
-    padding: 12,
-    borderRadius: 5,
-    alignItems: "center",
-    marginTop: 20,
-  },
-  addButtonText: {
-    color: "#fff",
-    fontWeight: "600",
-    fontSize: 18,
-  },
-  errorContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 20,
-  },
-  errorText: {
-    fontSize: 18,
-    color: "red",
-    textAlign: "center",
-  },
-});

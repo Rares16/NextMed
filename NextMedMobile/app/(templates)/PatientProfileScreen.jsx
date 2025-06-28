@@ -50,7 +50,7 @@ export default function PatientProfileScreen() {
         <Text style={PatientProfileStyles.header}>Patient Profile</Text>
         <Text style={PatientProfileStyles.patientName}>Name: {patient.name || 'N/A'}</Text>
         <Text style={PatientProfileStyles.patientAge}>Age: {patient.fields?.['Patient Age'] || 'N/A'}</Text>
-        <Text style={PatientProfileStyles.patientGender}>Gender: {patient.gender || 'N/A'}</Text>
+        <Text style={PatientProfileStyles.patientGender}>Gender: {patient.patientGender || 'N/A'}</Text>
 
         <Text style={PatientProfileStyles.sectionTitle}>Symptoms</Text>
         <Text style={PatientProfileStyles.sectionContent}>

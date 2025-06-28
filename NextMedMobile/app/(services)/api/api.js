@@ -1,9 +1,11 @@
 import axios from "axios";
+//import A_URL from ".env";
 
-const DB_URL = "https://curly-shrimps-hide.loca.lt/"; // Use the IP address of the computer running the server
+const DB_URL = "http://192.168.1.243:3000/"; // Use the IP address of the computer running the server
 
 // Login User
 export const loginUser = async (user) => {
+  console.log(user);
   const response = await axios.post(
     `${DB_URL}auth/login`,
     user,
@@ -13,6 +15,7 @@ export const loginUser = async (user) => {
       },
     }
   );
+  console.log('here');
   return response.data;
 };
 
@@ -86,7 +89,8 @@ export const getTemplateById = async (templateId) => {
 };
 
 // Update template by ID
-export const updateTemplateById = async (templateId, updates) => {
+export const updateTemplateById = async (templateId, updates, doctorId) => {
+  console.log('Log doctor:',doctorId);
   const config = {
     headers: {
       'Content-Type': 'application/json',
@@ -94,16 +98,40 @@ export const updateTemplateById = async (templateId, updates) => {
   };
 
   try {
+    // Combine updates and doctorId into a single request body object
+    const requestBody = {
+      ...updates,
+      ...(doctorId && { doctorId }) // Only include doctorId if it's provided
+    };
+
     const response = await axios.patch(
       `${DB_URL}templates/${templateId}`,
-      updates,
+      requestBody, // Send as single object
       config
     );
+    
     return response.data;
   } catch (error) {
     throw error;
   }
 };
+
+export const deleteTemplateById = async (templateId) => {
+  const config = {
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  };
+
+  try {
+    const response = await axios.delete(`${DB_URL}templates/${templateId}`, config);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+
 export const uploadAudioForTranscription = async (audioFileUri) => {
     try {
       console.log('Starting uploadAudioForTranscription function...');

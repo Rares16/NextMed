@@ -12,7 +12,7 @@ const templateSchema = new mongoose.Schema({
   doctorId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Doctor',
-    default: null, // Null for default templates, otherwise owned by a specific doctor
+    default: null,
   },
   fields: [
     {

@@ -104,7 +104,7 @@ const AudioRecordingScreen = () => {
     formData.append('doctorId', user.id);
 
     try {
-      const response = await axios.post('https://ninety-onions-stick.loca.lt/api/transcription/upload-audio', formData, {
+      const response = await axios.post('http://192.168.1.243:3000/api/transcription/upload-audio', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },

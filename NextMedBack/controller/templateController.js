@@ -114,6 +114,27 @@ exports.getCustomizedTemplates = async (req, res) => {
     }
   };
   
+  // Delete a template by ID
+  exports.deleteTemplateById = async (req, res) => {
+    const { templateId } = req.params;
+
+    if (!templateId || !mongoose.Types.ObjectId.isValid(templateId)) {
+      return res.status(400).json({ message: 'Invalid template ID.' });
+    }
+
+    try {
+      const deletedTemplate = await Template.findByIdAndDelete(templateId);
+
+      if (!deletedTemplate) {
+        return res.status(404).json({ message: 'Template not found.' });
+      }
+
+      res.status(200).json({ message: 'Template deleted successfully.', deletedTemplate });
+    } catch (error) {
+      console.error('Error deleting template:', error.message);
+      res.status(500).json({ message: 'Server error while deleting template.' });
+    }
+  };
 
 
 // Process all steps for a given doctor (for demonstration purposes)
@@ -200,10 +221,11 @@ exports.getTemplateById = async (req, res) => {
   };
   exports.updateTemplateById = async (req, res) => {
     const { templateId } = req.params;
-    const { fields } = req.body; // Make sure to use fields, not updates
+    const { fields, doctorId } = req.body; // Make sure to use fields, not updates
   
     console.log(`Received update request for template ID: ${templateId}`);
     console.log('Fields received for update:', fields);
+    console.log('DoctorId received:', doctorId);
   
     // Validation
     if (!templateId || !mongoose.Types.ObjectId.isValid(templateId)) {
@@ -215,6 +237,7 @@ exports.getTemplateById = async (req, res) => {
       console.error('Invalid fields provided:', fields);
       return res.status(400).json({ message: 'Invalid updates provided. "fields" must be an array.' });
     }  
+  
     try {
       // Find the template by ID
       let template = await Template.findById(templateId);
@@ -222,26 +245,67 @@ exports.getTemplateById = async (req, res) => {
         return res.status(404).json({ message: 'Template not found.' });
       }
   
-      // Update fields - Add or remove fields
-      fields.forEach(update => {
-        if (update.action === 'add') {
-          template.fields.push({
-            fieldName: update.fieldName,
-            fieldType: update.fieldType,
-            required: update.required,
-            options: update.options || [],
-          });
-        } else if (update.action === 'remove') {
-          template.fields = template.fields.filter(field => field.fieldName !== update.fieldName);
+      // Create a new customized template if doctorId is provided
+      if (doctorId) {
+        // Validate doctorId format
+        if (!mongoose.Types.ObjectId.isValid(doctorId)) {
+          return res.status(400).json({ message: 'Invalid doctorId format.' });
         }
-      });
   
-      // Save updated template
-      await template.save();
-      res.status(200).json(template);
+        // Apply field updates to create the modified fields array
+        let modifiedFields = [...template.fields]; // Start with original fields
+        
+        fields.forEach(update => {
+          if (update.action === 'add') {
+            modifiedFields.push({
+              fieldName: update.fieldName,
+              fieldType: update.fieldType,
+              required: update.required,
+              options: update.options || [],
+            });
+          } else if (update.action === 'remove') {
+            modifiedFields = modifiedFields.filter(field => field.fieldName !== update.fieldName);
+          }
+        });
+  
+        // Create new customized template
+        const customizedTemplateData = {
+          name: template.name + '(customized)',
+          specialty: template.specialty,
+          doctorId: new mongoose.Types.ObjectId(doctorId),
+          fields: modifiedFields,
+        };
+  
+        console.log('Creating template with data:', customizedTemplateData);
+        
+        const customizedTemplate = new Template(customizedTemplateData);
+        await customizedTemplate.save();
+        
+        console.log('Saved template:', customizedTemplate.toObject());
+        console.log(`Created new customized template for doctor: ${doctorId}`);
+        
+        res.status(201).json(customizedTemplate);
+      } else {
+        // Update the original template if no doctorId provided
+        fields.forEach(update => {
+          if (update.action === 'add') {
+            template.fields.push({
+              fieldName: update.fieldName,
+              fieldType: update.fieldType,
+              required: update.required,
+              options: update.options || [],
+            });
+          } else if (update.action === 'remove') {
+            template.fields = template.fields.filter(field => field.fieldName !== update.fieldName);
+          }
+        });
+  
+        // Save updated template
+        await template.save();
+        res.status(200).json(template);
+      }
     } catch (error) {
       console.error('Error updating template:', error.message);
       res.status(500).json({ message: 'Server error while updating template.' });
     }
   };
-  

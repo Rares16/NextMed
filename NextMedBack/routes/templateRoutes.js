@@ -9,6 +9,7 @@ const {
   getCustomizedTemplates,
   updateTemplateById,
   processAllStepsForDoctor,
+  deleteTemplateById,
 } = require('../controller/templateController');
 
 // Route to create a default template
@@ -27,4 +28,5 @@ router.get('/my/:doctorId', getCustomizedTemplates);
 router.post('/all-steps/:doctorId', processAllStepsForDoctor);
 router.get('/:templateId', getTemplateById); 
 router.patch('/:templateId', updateTemplateById);
+router.delete('/:templateId', deleteTemplateById);
 module.exports = router;
