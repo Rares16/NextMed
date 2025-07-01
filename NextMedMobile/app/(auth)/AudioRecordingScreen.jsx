@@ -19,7 +19,7 @@ const AudioRecordingScreen = () => {
   const [uploading, setUploading] = useState(false);
   const [transcriptionStatus, setTranscriptionStatus] = useState(null);
   const [selectedTemplate, setSelectedTemplate] = useState(null);
-  const [open, setOpen] = useState(false); // Controls dropdown visibility
+  const [open, setOpen] = useState(false);
 
   const user = useSelector((state) => state.auth.user);
   const specialty = 'Gynecology';

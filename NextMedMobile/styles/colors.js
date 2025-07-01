@@ -1,4 +1,3 @@
-// styles/colors.js
 export const colors = {
     background: '#f1f9ff',
     inputBackground: '#ccecee',

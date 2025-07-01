@@ -12,6 +12,9 @@ const PatientSchema = new mongoose.Schema({
     ref: 'Doctor',
     required: true
   },
+  patientGender: { 
+    type: String, 
+    default: 'N/A' },
   fields: {
     type: Map,
     of: String

@@ -52,15 +52,14 @@ export default function PatientProfileScreen() {
         <Text style={PatientProfileStyles.patientAge}>Age: {patient.fields?.['Patient Age'] || 'N/A'}</Text>
         <Text style={PatientProfileStyles.patientGender}>Gender: {patient.patientGender || 'N/A'}</Text>
 
-        <Text style={PatientProfileStyles.sectionTitle}>Symptoms</Text>
-        <Text style={PatientProfileStyles.sectionContent}>
-          {patient.fields?.['Symptoms'] || 'No symptoms available.'}
-        </Text>
-
-        <Text style={PatientProfileStyles.sectionTitle}>Previous Pregnancy Complications</Text>
-        <Text style={PatientProfileStyles.sectionContent}>
-          {patient.fields?.['Previous Pregnancy Complications'] || 'N/A'}
-        </Text>
+        {patient.fields && Object.keys(patient.fields).map((fieldKey, index) => (
+          <View key={index} style={{ marginBottom: 10 }}>
+            <Text style={PatientProfileStyles.sectionTitle}>{fieldKey}</Text>
+            <Text style={PatientProfileStyles.sectionContent}>
+              {patient.fields[fieldKey] || 'N/A'}
+            </Text>
+          </View>
+        ))}
 
         <TouchableOpacity
           style={PatientProfileStyles.backButton}

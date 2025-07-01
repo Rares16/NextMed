@@ -3,6 +3,7 @@ const AWS = require('aws-sdk');
 const fetch = require('node-fetch');
 const Patient = require('../model/Patient');
 const Template = require('../model/Template');
+const comprehend = new AWS.ComprehendMedical();
 
 // AWS Configuration
 AWS.config.update({
@@ -76,91 +77,68 @@ function extractTranscriptionText(transcriptionData) {
   }
 }
 
-// Create a patient profile using transcription and template
 async function createPatientProfile(transcriptionText, templateId) {
-    try {
-      console.log('Creating patient profile with templateId:', templateId);
-  
-      // Fetch the selected template
-      const template = await Template.findById(templateId);
-      if (!template) {
-        throw new Error('Template not found.');
+  try {
+    console.log('Creating patient profile with templateId:', templateId);
+
+    // Fetch template
+    const template = await Template.findById(templateId);
+    if (!template) throw new Error('Template not found');
+
+    // Analyze entities using Comprehend Medical
+    const comprehendResponse = await comprehend
+      .detectEntitiesV2({ Text: transcriptionText })
+      .promise();
+
+    const entities = comprehendResponse.Entities;
+    console.log('Entities detected by Comprehend Medical:', JSON.stringify(entities, null, 2));
+
+    // Prepare patientData based on template fields
+    const patientData = {
+      name: 'Unknown',
+      age: null,
+      gender: null,
+      doctorId: template.doctorId,
+      templateId: template._id,
+      transcription: transcriptionText,
+      extractedFields: {},
+    };
+
+    // Map relevant entity types
+    for (const entity of entities) {
+      const text = entity.Text;
+      switch (entity.Type) {
+        case 'NAME':
+          patientData.name = text;
+          break;
+        case 'AGE':
+          patientData.age = text;
+          break;
+        case 'GENDER':
+          patientData.gender = text;
+          break;
       }
-  
-      // Initialize patient data object
-      const patientData = {
-        name: 'Unknown', // Default name if not available from transcription
-        templateId: template._id,
-        fields: {},
-      };
-  
-      // Pre-process transcription text: remove filler words, correct common mistakes, convert to lowercase, trim whitespace
-      let processedText = transcriptionText.toLowerCase()
-        .replace(/\s*(uh|um|er|they|like)\s*/g, ' ') // Remove filler words
-        .replace(/\bsuff\b/g, 'suffer') // Fix common transcription errors
-        .replace(/\bi'm\b/g, 'i am') // Convert contractions to a common form
-        .trim();
-      console.log('Processed transcription text:', processedText);
-  
-      // Extract fields from transcription using the template structure
-      template.fields.forEach((field) => {
-        let regex;
-        console.log(`Attempting to extract value for field: ${field.fieldName}`);
-  
-        // Create different regex patterns depending on the common phrases
-        switch (field.fieldName.toLowerCase()) {
-          case 'name':
-            // Matches variations like "my name is..." or "i am ..."
-            regex = /(?:my name is|i am|i'm)\s+([\w\s]+)/i;
-            console.log(`Regex used for field "name": ${regex}`);
-            break;
-          case 'age':
-          case 'patient age':
-            // Matches "i am 20 years old", "i'm 20 years old", or slight variations
-            regex = /(?:i am|i'm|age is|i am aged)\s+(\d+)\s*(years\s*old)?/i;
-            console.log(`Regex used for field "age": ${regex}`);
-            break;
-          case 'symptoms':
-            // Matches phrases like "currently experiencing", "i have", "suffer from"
-            regex = /(?:i am currently experiencing|currently experiencing|i have|i'm suffering from|i suffer from|suffer from)\s+([\w\s,]+)/i;
-            console.log(`Regex used for field "symptoms": ${regex}`);
-            break;
-          case 'last menstrual period':
-            // Matches variations like "last menstrual period was" or "lmp was"
-            regex = /(?:last menstrual period|lmp)\s+(?:was|occurred|happened)\s+([\w\s]+)/i;
-            console.log(`Regex used for field "last menstrual period": ${regex}`);
-            break;
-          case 'previous pregnancy complications':
-            // Matches variations for previous complications
-            regex = /(?:previous pregnancy complications|past complications)\s*(?:are|were|include)?\s*([\w\s,]+)/i;
-            console.log(`Regex used for field "previous pregnancy complications": ${regex}`);
-            break;
-          default:
-            // Skip irrelevant fields like "G", "c", "L", "D"
-            console.log(`Skipping field: ${field.fieldName} as it is not relevant for matching.`);
-            return;
+
+      // Check for custom template fields
+      for (const field of template.fields) {
+        if (
+          field.name &&
+          text.toLowerCase().includes(field.name.toLowerCase()) &&
+          !patientData.extractedFields[field.name]
+        ) {
+          patientData.extractedFields[field.name] = text;
         }
-  
-        const match = processedText.match(regex);
-        if (match && match[1]) {
-          console.log(`Matched value for ${field.fieldName}:`, match[1]);
-          patientData.fields[field.fieldName] = match[1].trim();
-        } else {
-          console.log(`No match found for field: ${field.fieldName}`);
-        }
-      });
-  
-      // Create and save the patient profile
-      const newPatient = new Patient(patientData);
-      await newPatient.save();
-      console.log('Patient profile created successfully:', newPatient);
-  
-      return newPatient;
-    } catch (error) {
-      console.error('Error creating patient profile:', error);
-      throw new Error(`Failed to create patient profile: ${error.message}`);
+      }
     }
-  }  
+
+    // Save to MongoDB
+    const newPatient = await Patient.create(patientData);
+    return newPatient;
+  } catch (error) {
+    console.error('Error creating patient profile:', error);
+    throw error;
+  }
+}
 module.exports = {
   uploadAudioToS3,
   startTranscription,

@@ -1,7 +1,7 @@
-require('dotenv').config({ path: __dirname + '/../.env' }); // Adjust the path to load .env file correctly
+require('dotenv').config({ path: __dirname + '/../.env' });
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
-const Doctor = require('../model/Doctor'); // Make sure the path to Doctor is correct
+const Doctor = require('../model/Doctor');
 
 // Get the MongoDB URI from the environment variables
 const mongoURI = process.env.MONGODB_URI;

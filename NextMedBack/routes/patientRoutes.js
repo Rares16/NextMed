@@ -85,7 +85,6 @@ router.get('/:id', async (req, res) => {
         return res.status(404).json({ message: 'Patient not found' });
       }
   
-      // Optionally, attach additional doctor information if required
       const doctor = await Doctor.findById(patient.doctorId).lean();
   
       // Constructing the full patient data, including the doctor if available

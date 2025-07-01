@@ -1,8 +1,7 @@
-// styles/form.js
 import { StyleSheet } from 'react-native';
 import { colors } from './colors';
 
-const componentWidth = '80%'; // Based on screen width percentage
+const componentWidth = '80%';
 
 const formStyle = StyleSheet.create({
   form: {

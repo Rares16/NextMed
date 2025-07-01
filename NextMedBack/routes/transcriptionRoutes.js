@@ -4,6 +4,8 @@ const express = require('express');
 const router = express.Router();
 const { getTranscriptionResultFromS3, extractTranscriptionText } = require('../model/Transcription');
 const Patient = require('../model/Patient');  
+const transcribeController = require('../controller/transcribeController');
+
 
 AWS.config.update({
   accessKeyId: process.env.AWS_ACCESS_KEY_ID,
@@ -13,7 +15,8 @@ AWS.config.update({
 
 const s3 = new AWS.S3();
 const transcribeService = new AWS.TranscribeService();
-const comprehend = new AWS.Comprehend();
+//const comprehend = new AWS.Comprehend();  This is from the previous iteration
+const comprehendMedical = new AWS.ComprehendMedical();
 
 // Configure multer for file upload
 const upload = multer({ storage: multer.memoryStorage() });
@@ -21,17 +24,16 @@ const upload = multer({ storage: multer.memoryStorage() });
 // Function to analyze transcription using AWS Comprehend
 async function analyzeTranscriptionWithComprehend(transcriptionText) {
   const params = {
-    Text: transcriptionText,
-    LanguageCode: 'en',
+    Text: transcriptionText
   };
 
   try {
-    const data = await comprehend.detectEntities(params).promise();
-    console.log("Entities detected by Comprehend:", data.Entities);
+    const data = await comprehendMedical.detectEntitiesV2(params).promise();
+    console.log("Entities detected by Comprehend Medical:", data.Entities);
     return data.Entities;
   } catch (err) {
-    console.error("Error calling AWS Comprehend:", err);
-    throw new Error("Failed to extract information using AWS Comprehend.");
+    console.error("Error calling AWS Comprehend Medical:", err);
+    throw new Error("Failed to extract medical information.");
   }
 }
 
@@ -86,33 +88,32 @@ router.post('/upload-audio', upload.single('audio'), async (req, res) => {
 
         // Step 6: Analyze transcription using AWS Comprehend
         const entities = await analyzeTranscriptionWithComprehend(transcriptionText);
+
+        const patientData = {};
         
         // Step 7: Map entities to fields
-        const patientData = {};
         entities.forEach(entity => {
-            console.log(`Entity Type: ${entity.Type}, Text: ${entity.Text}`);
-            switch (entity.Type) {
-              case 'PERSON':
-                patientData.name = entity.Text;
-                break;
-              case 'QUANTITY':
-                if (entity.Text.includes('years')) {
-                  patientData.age = entity.Text.replace('years old', '').trim();
-                }
-                break;
-              case 'SYMPTOM':
-                patientData.symptoms = patientData.symptoms ? `${patientData.symptoms}, ${entity.Text}` : entity.Text;
-                break;
-              case 'EVENT':
-                if (entity.Text.toLowerCase().includes('abortion')) {
-                  patientData.previousPregnancyComplications = entity.Text;
-                }
-                break;
-              default:
-                console.warn(`Unhandled entity type: ${entity.Type}`);
-                break;
-            }
-          });
+          console.log(`Entity Type: ${entity.Type}, Text: ${entity.Text}`);
+          switch (entity.Type) {
+            case 'NAME':
+              patientData.name = entity.Text;
+              break;
+            case 'AGE':
+              patientData.age = entity.Text;
+              break;
+            case 'DX_NAME':
+              patientData.symptoms = patientData.symptoms ? `${patientData.symptoms}, ${entity.Text}` : entity.Text;
+              break;
+            case 'TEST_NAME':
+              patientData.tests = patientData.tests ? `${patientData.tests}, ${entity.Text}` : entity.Text;
+              break;
+            case 'SYSTEM_ORGAN_SITE':
+              break;
+            default:
+              console.warn(`Unhandled entity type: ${entity.Type}`);
+              break;
+          }
+        });        
         // Step 8: Create Patient Profile
         const newPatient = new Patient({
           name: patientData.name || 'Unknown',
@@ -128,11 +129,9 @@ router.post('/upload-audio', upload.single('audio'), async (req, res) => {
         await newPatient.save();
         console.log('Patient profile created successfully:', newPatient);
 
-        // Respond with patient profile data
         return res.status(201).json({ patient: newPatient });
       }
 
-      // Add delay between polling to avoid excessive API requests
       await new Promise((resolve) => setTimeout(resolve, 5000));
     }
   } catch (error) {
@@ -140,5 +139,5 @@ router.post('/upload-audio', upload.single('audio'), async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
-
+router.post('/process', transcribeController.processTranscription);
 module.exports = router;

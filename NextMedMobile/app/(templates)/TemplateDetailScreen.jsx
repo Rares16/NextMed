@@ -14,8 +14,7 @@ import {
 } from 'react-native';
 import { useLocalSearchParams, useNavigation } from 'expo-router';
 import { getTemplateById, updateTemplateById, deleteTemplateById } from '../(services)/api/api';
-import styles from '../../styles/TemplateDetailStyles'; // Your external styles file
-
+import styles from '../../styles/TemplateDetailStyles';
 export default function TemplateDetailScreen() {
   const [doctorId, setDoctorId] = useState(null);
   const user = useSelector((state) => state.auth.user);
@@ -43,7 +42,6 @@ export default function TemplateDetailScreen() {
   });
   const [isCustomTemplate, setIsCustomTemplate] = useState(false);
 
-    // When fetching template:
     useEffect(() => {
       if (template?.doctorId) {
         setIsCustomTemplate(true);
@@ -138,7 +136,7 @@ export default function TemplateDetailScreen() {
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
-          {/* Back Button */}
+          {}
           <View style={styles.topActionBar}>
             <TouchableOpacity style={[styles.actionButton, styles.backButton]} onPress={() => navigation.goBack()}>
               <Text style={styles.actionButtonText}>Back</Text>

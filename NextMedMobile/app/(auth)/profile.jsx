@@ -12,7 +12,7 @@ const ProfileScreen = () => {
   const doctorId = user?.id;
   const [doctor, setDoctor] = useState(null);
   const [loading, setLoading] = useState(true);
-  const router = useRouter(); // Hook to handle navigation
+  const router = useRouter();
 
   useEffect(() => {
     console.log("Doctor id now:", doctorId);
@@ -20,7 +20,7 @@ const ProfileScreen = () => {
       const fetchDoctorInfo = async () => {
         try {
           const doctorData = await getDoctorInfo(doctorId);
-          console.log("Fetched Doctor Data:", doctorData); // Add a console log to see the data
+          console.log("Fetched Doctor Data:", doctorData);
           setDoctor(doctorData);
         } catch (error) {
           console.error('Error fetching doctor data', error);
@@ -65,7 +65,7 @@ const ProfileScreen = () => {
           style={ProfileScreenStyles.profileImage}
         />
       </View>
-      <Text style={ProfileScreenStyles.profileName}>Dr. {doctor.name}</Text>
+      <Text style={ProfileScreenStyles.profileName}> {doctor.name}</Text>
       <Text style={ProfileScreenStyles.profileHospital}>Hospital: {doctor.hospital}</Text>
 
       {/* Display the list of patients */}

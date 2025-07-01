@@ -2,8 +2,8 @@
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
-const Doctor = require('../model/Doctor'); // Import the Doctor model
-const Patient = require('../model/Patient'); // Import the Patient model
+const Doctor = require('../model/Doctor');
+const Patient = require('../model/Patient');
 
 // Get a specific doctor by ID, including patients
 router.get('/:id', async (req, res) => {

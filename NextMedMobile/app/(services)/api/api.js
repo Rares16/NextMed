@@ -33,7 +33,7 @@ export const getDoctorInfo = async (doctorId) => {
     return response.data;
   } catch (error) {
     console.error('Error fetching doctor info:', error);
-    throw error; // Re-throw the error so it can be handled where this function is called
+    throw error;
   }
 };
 export const getPatientInfo = async (patientID) => {

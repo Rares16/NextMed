@@ -1,4 +1,3 @@
-// app/components/PrivateRoute.jsx
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { useRouter } from 'expo-router';
